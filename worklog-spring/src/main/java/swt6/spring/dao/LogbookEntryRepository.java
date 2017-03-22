@@ -1,9 +1,9 @@
-package swt6.spring.worklog.dao;
+package swt6.spring.dao;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import swt6.spring.worklog.domain.LogbookEntry;
+import swt6.spring.domain.LogbookEntry;
 
 @Repository
 public interface LogbookEntryRepository extends JpaRepository<LogbookEntry, Long> {

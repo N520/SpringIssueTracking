@@ -11,7 +11,7 @@
 
 	<!-- Configurer that replaces ${...} placeholders with values from a properties 
 		file -->
-	<context:property-placeholder location="swt6/spring/worklog/jdbc.properties" />
+	<context:property-placeholder location="swt6/spring/worklog/jpa.properties" />
 
 	<!-- Definion of local datasource. Uses Apache Commons DBCP for connection 
 		pooling. See Commons DBCP documentation for the required JAR files. See the 
@@ -31,7 +31,7 @@
 	</bean>
 
 	<!-- ========================= DAO DEFINITIONS ========================= -->
-	<bean id="emplDaoJdbc" class="swt6.spring.worklog.dao.jdbc.EmployeeDaoJdbc"
+	<bean id="emplDao" class=""
 		lazy-init="true">
 		<property name="dataSource" ref="dataSource"></property>
 	</bean>
