@@ -8,10 +8,10 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import swt6.spring.domain.Employee;
-import swt6.spring.domain.LogbookEntry;
+import swt6.spring.domain.Project;
 
-@Repository("lbRepo")
-public interface LogbookEntryRepository extends JpaRepository<LogbookEntry, Long> {
-	@Query("from LogbookEntry lb where lb.employee = :employee")
-	List<LogbookEntry> findForEmployee(@Param("employee") Employee employee);
+@Repository("projectRepo")
+public interface ProjectRepository extends JpaRepository<Project, Long> {
+	@Query("from Project where projectLead = :lead")
+	List<Project> findForProjectLead(@Param("lead") Employee lead);
 }

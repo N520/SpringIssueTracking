@@ -21,6 +21,8 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -34,6 +36,7 @@ public abstract class Employee implements Serializable {
 	private Long id;
 	private String firstName;
 	private String lastName;
+	@Temporal(TemporalType.DATE)
 	private Date dateOfBirth;
 
 	@Embedded
