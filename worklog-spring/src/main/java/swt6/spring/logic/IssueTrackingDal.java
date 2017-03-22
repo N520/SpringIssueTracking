@@ -14,6 +14,7 @@ import swt6.spring.dao.ModuleRepository;
 import swt6.spring.dao.ProjectRepository;
 import swt6.spring.domain.Employee;
 import swt6.spring.domain.Issue;
+import swt6.spring.domain.IssueType;
 import swt6.spring.domain.LogbookEntry;
 import swt6.spring.domain.Module;
 import swt6.spring.domain.Phase;
@@ -67,13 +68,6 @@ public class IssueTrackingDal {
 		return emplRepo.findByLastNameContaining(lastName);
 	}
 
-	@Transactional
-	public void assignIssueToEmployee(Issue issue, Employee employee) {
-		employee.addIssue(issue);
-		emplRepo.save(employee);
-		issueRepo.save(issue);
-	}
-
 	// END Employee methods
 	// -------------------------------------------------------------------------------------------------------------
 
@@ -114,7 +108,7 @@ public class IssueTrackingDal {
 		findAllLogbookEntriesForProject(project).forEach(this::deleteLogbookEntry);
 		findAllIssuesForPoject(project).forEach(this::deleteIssue);
 		findAllModulesForProject(project).forEach(this::deleteModule);
-		
+
 		projectRepo.delete(project);
 
 	}
@@ -157,11 +151,45 @@ public class IssueTrackingDal {
 	}
 
 	// TODO addLogbookEntryToIssue throw exception if issue not assigned to
-	// project (addLogbookEntryToProject(Projcet p, module m))
+	// project ( use addLogbookEntryToProject(Projcet p, module m))
 	// if adding lb to issue and issue has project also add lb to project/module
 	// TODO moveIssueToProject
 	// handeled in Issue.moveToProject
 
+	/**
+	 * assigns an employee to the issue and also allows to update the issues
+	 * state with it. if updatedState == null it won't be updatet
+	 * 
+	 * @param issue
+	 * @param employee
+	 * @param updatedState
+	 * @throws {@link
+	 *             IllegalStateException} if the employee has already worked on
+	 *             the issue
+	 */
+	@Transactional
+	public void assignIssueToEmployee(Issue issue, Employee employee, IssueType updatedState) {
+		if (issue.getEmployee() != null && issue.getLogbookEntries().size() > 0)
+			throw new IllegalStateException("cannot move Employee from issue on which he has already worked on");
+		employee.addIssue(issue);
+		if (updatedState != null)
+			issue.setState(updatedState);
+		emplRepo.save(employee);
+		issueRepo.save(issue);
+	}
+
+	/**
+	 * assigns an employee to the issue
+	 * 
+	 * @param issue
+	 * @param employee
+	 * @throws {@link
+	 *             IllegalStateException} if the employee has already worked on
+	 *             the issue
+	 */
+	public void assignIssueToEmployee(Issue issue, Employee employee) {
+		assignIssueToEmployee(issue, employee, null);
+	}
 	// END Issue methods
 	// -------------------------------------------------------------------------------------------------------------
 
@@ -184,8 +212,8 @@ public class IssueTrackingDal {
 		m = syncModule(m);
 		moduleRepo.delete(m);
 	}
-	
-	@Transactional(readOnly=true)
+
+	@Transactional(readOnly = true)
 	public List<Module> findAllModulesForProject(Project project) {
 		return moduleRepo.findForProject(project);
 	}
