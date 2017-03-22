@@ -19,4 +19,5 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
 	@Query("select e from Employee e where e.dateOfBirth > :date")
 	List<Employee> findOlderThan(@Param("date")Date date);
+	
 }

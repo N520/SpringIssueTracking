@@ -25,7 +25,7 @@ public class LogbookEntry implements Serializable {
 	@Column(nullable = false)
 	private Date startTime;
 	private Date endTime;
-	@ManyToOne(cascade = { CascadeType.PERSIST }, optional = false, fetch = FetchType.EAGER)
+	@ManyToOne(optional = false, fetch = FetchType.EAGER)
 	private Employee employee;
 
 	@Embedded
