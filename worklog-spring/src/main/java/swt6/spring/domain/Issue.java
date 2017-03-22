@@ -51,7 +51,7 @@ public class Issue implements Serializable {
 	@ManyToOne(optional = false)
 	private Project project;
 
-	@OneToMany(cascade = { CascadeType.MERGE, CascadeType.REFRESH }, mappedBy = "issue", orphanRemoval = true)
+	@OneToMany(cascade = { CascadeType.MERGE, CascadeType.REFRESH, CascadeType.REMOVE }, mappedBy = "issue", orphanRemoval = true)
 	private Set<LogbookEntry> logbookEntries = new HashSet<>();
 
 	public Issue() {
@@ -167,16 +167,17 @@ public class Issue implements Serializable {
 	 *            which module of project the logbookentries should migrate to
 	 */
 	public void moveToProject(Project project, Module m) {
+		
 		if (project != null) {
 			project.addIssue(this);
 			this.project = project;
 			if (m.getProject() != null && !m.getProject().getId().equals(project.getId()))
 				throw new IllegalArgumentException("project does not contain this model!");
 			getLogbookEntries().forEach(lb -> lb.setModule(m));
-		}
+		} 
 		if (this.project != null) {
 			this.project.removeIssue(this);
-			
+			getLogbookEntries().forEach(lb -> lb.setModule(null));
 		}
 	}
 

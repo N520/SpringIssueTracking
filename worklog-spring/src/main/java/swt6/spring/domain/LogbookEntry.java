@@ -33,7 +33,7 @@ public class LogbookEntry implements Serializable {
 	@Column(nullable = false)
 	private Phase phase;
 
-	@ManyToOne(optional = false, cascade = { CascadeType.MERGE })
+	@ManyToOne(optional = true)
 	private Module module;
 
 	@ManyToOne

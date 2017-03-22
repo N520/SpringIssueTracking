@@ -38,8 +38,8 @@ public class Project implements Serializable {
 	@JoinColumn(name = "projectLead")
 	private Employee projectLeader;
 
-	@OneToMany(mappedBy = "project", cascade = { CascadeType.MERGE, CascadeType.REFRESH,
-			CascadeType.REFRESH }, fetch = FetchType.EAGER, orphanRemoval = false)
+	@OneToMany(mappedBy = "project", cascade = { CascadeType.MERGE,
+			CascadeType.REFRESH}, fetch = FetchType.EAGER, orphanRemoval = true)
 	private Set<Module> modules = new HashSet<>();
 
 	public Long getId() {

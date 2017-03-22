@@ -67,6 +67,13 @@ public class IssueTrackingDal {
 		return emplRepo.findByLastNameContaining(lastName);
 	}
 
+	@Transactional
+	public void assignIssueToEmployee(Issue issue, Employee employee) {
+		employee.addIssue(issue);
+		emplRepo.save(employee);
+		issueRepo.save(issue);
+	}
+
 	// END Employee methods
 	// -------------------------------------------------------------------------------------------------------------
 
@@ -101,6 +108,17 @@ public class IssueTrackingDal {
 		return projectRepo.findAll();
 	}
 
+	@Transactional
+	public void deleteProject(Project project) {
+
+		findAllLogbookEntriesForProject(project).forEach(this::deleteLogbookEntry);
+		findAllIssuesForPoject(project).forEach(this::deleteIssue);
+		findAllModulesForProject(project).forEach(this::deleteModule);
+		
+		projectRepo.delete(project);
+
+	}
+
 	// TODO addModuleToProject
 
 	// END project methods
@@ -108,6 +126,11 @@ public class IssueTrackingDal {
 
 	// Issue methods
 	// -------------------------------------------------------------------------------------------------------------
+	@Transactional(readOnly = true)
+	public List<Issue> findAllIssuesForPoject(Project project) {
+		return issueRepo.findForProject(project);
+	}
+
 	@Transactional
 	public Issue syncIssue(Issue issue) {
 		return issueRepo.save(issue);
@@ -115,6 +138,8 @@ public class IssueTrackingDal {
 
 	@Transactional
 	public void deleteIssue(Issue issue) {
+
+		issue.getLogbookEntries().forEach(this::deleteLogbookEntry);
 
 		issue.moveToProject(null, null);
 		issue.detachEmployee();
@@ -153,6 +178,18 @@ public class IssueTrackingDal {
 		return moduleRepo.findAll();
 	}
 
+	@Transactional
+	public void deleteModule(Module m) {
+		m.setProject(null);
+		m = syncModule(m);
+		moduleRepo.delete(m);
+	}
+	
+	@Transactional(readOnly=true)
+	public List<Module> findAllModulesForProject(Project project) {
+		return moduleRepo.findForProject(project);
+	}
+
 	// END module methods
 	// -------------------------------------------------------------------------------------------------------------
 
@@ -168,8 +205,15 @@ public class IssueTrackingDal {
 		return lbRepo.findAll();
 	}
 
+	@Transactional(readOnly = true)
+	public List<LogbookEntry> findAllLogbookEntriesForProject(Project project) {
+		return lbRepo.findForProject(project);
+	}
+
 	@Transactional
 	public void deleteLogbookEntry(LogbookEntry entry) {
+		// entry.setModule(null);
+		// entry = syncLogbookEntry(entry);
 		lbRepo.delete(entry);
 		System.out.println(entry);
 	}
@@ -204,6 +248,7 @@ public class IssueTrackingDal {
 		return lb;
 
 	}
+
 	// END Logbookentries methods
 	// -------------------------------------------------------------------------------------------------------------
 

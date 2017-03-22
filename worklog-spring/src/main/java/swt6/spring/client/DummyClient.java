@@ -34,9 +34,8 @@ public class DummyClient {
 			project = dal.syncProject(project);
 
 			lb = dal.createLogbookEntry(new Date(), null, empl1, module);
-			
-			lb = dal.createLogbookEntry(new Date(), null, empl1, module);
 
+			lb = dal.createLogbookEntry(new Date(), null, empl1, module);
 
 			dal.findAllEmployees().forEach(System.out::println);
 
@@ -53,7 +52,7 @@ public class DummyClient {
 			dal.deleteIssue(issue);
 			System.out.println("=========== DONE DELETING ISSUE ===========");
 
-			Project p2 = new Project("project2", empl1);
+			Project p2 = dal.syncProject(new Project("project2", empl1));
 			Module module2 = dal.syncModule(new Module("module"));
 			p2.addModule(module2);
 			p2 = dal.syncProject(p2);
@@ -69,6 +68,19 @@ public class DummyClient {
 
 			// issue.moveToProject(project, module);
 			issue = dal.syncIssue(issue);
+
+			dal.assignIssueToEmployee(issue, empl1);
+
+			empl1 = dal.findEmployeeById(empl1.getId());
+
+			 dal.findAllLogbookEntriesForProject(project).forEach(dal::deleteLogbookEntry);
+			 dal.deleteProject(project);
+			 dal.deleteIssue(issue);
+
+			 dal.deleteModule(module);
+//			dal.findAllProjects().forEach(dal::deleteProject);
+
+			// dal.deleteEmployee(empl1);
 
 			// dal.deleteEmployee(empl1);
 
