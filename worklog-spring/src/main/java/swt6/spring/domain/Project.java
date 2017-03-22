@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -13,7 +14,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
+
+import org.hibernate.annotations.Cascade;
 
 @Entity
 public class Project implements Serializable {
@@ -22,19 +24,22 @@ public class Project implements Serializable {
 	@Id
 	@GeneratedValue
 	private Long id;
+
+	@Column(nullable = false, length = 50)
 	private String name;
 
-	@ManyToMany(fetch = FetchType.EAGER) // ????ß
+	@ManyToMany(fetch = FetchType.EAGER)
 	private Set<Employee> members = new HashSet<>();
 
 	@OneToMany(mappedBy = "project", fetch = FetchType.EAGER)
 	private Set<Issue> issues = new HashSet<>();
 
-	@ManyToOne(optional = true)
+	@ManyToOne(optional = false, cascade = { CascadeType.MERGE, CascadeType.REFRESH })
 	@JoinColumn(name = "projectLead")
 	private Employee projectLeader;
 
-	@OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = false)
+	@OneToMany(mappedBy = "project", cascade = { CascadeType.MERGE, CascadeType.REFRESH,
+			CascadeType.REFRESH }, fetch = FetchType.EAGER, orphanRemoval = false)
 	private Set<Module> modules = new HashSet<>();
 
 	public Long getId() {

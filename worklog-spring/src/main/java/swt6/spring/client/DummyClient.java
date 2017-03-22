@@ -5,13 +5,9 @@ import java.util.Date;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import swt6.spring.dao.EmployeeRepository;
-import swt6.spring.dao.IssueRepository;
-import swt6.spring.dao.LogbookEntryRepository;
-import swt6.spring.dao.ModuleRepository;
-import swt6.spring.dao.ProjectRepository;
 import swt6.spring.domain.Address;
 import swt6.spring.domain.Employee;
+import swt6.spring.domain.Issue;
 import swt6.spring.domain.LogbookEntry;
 import swt6.spring.domain.Module;
 import swt6.spring.domain.PermanentEmployee;
@@ -23,47 +19,58 @@ public class DummyClient {
 	public static void main(String[] args) {
 		try (AbstractApplicationContext factory = new ClassPathXmlApplicationContext(
 				"swt6/spring/applicationContext.xml")) {
-			EmployeeRepository emplRepo = factory.getBean("emplRepo", EmployeeRepository.class);
-			LogbookEntryRepository lbRepo = factory.getBean("lbRepo", LogbookEntryRepository.class);
-			ModuleRepository moduleRepo = factory.getBean("moduleRepo", ModuleRepository.class);
-			ProjectRepository projectRepo = factory.getBean("projectRepo", ProjectRepository.class);
-			IssueRepository issueRepo = factory.getBean("issueRepo", IssueRepository.class);
-
 			IssueTrackingDal dal = factory.getBean("issueDal", IssueTrackingDal.class);
 
-			Employee empl1 = new PermanentEmployee("some", "name", new Date(), new Address("4300", "sdas", "1231"),
-					20000);
-			empl1 = emplRepo.save(empl1);
-			Module module = moduleRepo.save(new Module("m1"));
-			Project project = projectRepo.save(new Project("project 1", empl1));
-
+			Employee empl1 = dal.syncEmployee(
+					new PermanentEmployee("some", "name", new Date(), new Address("4300", "sdas", "1231"), 20000));
+			Module module = dal.syncModule(new Module("m1"));
+			Project project = dal.syncProject(new Project("project 1", empl1));
+			Issue issue = new Issue(project);
 			LogbookEntry lb = new LogbookEntry();
-			lb.setStartTime(new Date());
-			lb.setModule(module);
-			lb.setEmployee(emplRepo.findOne(1L));
+			empl1 = dal.findEmployeeByLastname("name").stream().findFirst().get();
 
-			lb = lbRepo.save(lb);
+			project.addModule(module);
 
-			lb = new LogbookEntry();
-			lb.setStartTime(new Date());
-			lb.setModule(moduleRepo.findAll().get(0));
-			lb.setEmployee(emplRepo.findOne(1L));
+			project = dal.syncProject(project);
 
-			lb = lbRepo.save(lb);
+			lb = dal.createLogbookEntry(new Date(), null, empl1, module);
+			
+			lb = dal.createLogbookEntry(new Date(), null, empl1, module);
 
-			emplRepo.findAll().forEach(System.out::println);
-			dal.findAllEmployees();
 
-			emplRepo.findByLastNameContaining("na").forEach(System.out::println);
-			;
+			dal.findAllEmployees().forEach(System.out::println);
 
-			lb = lbRepo.save(lb);
+			// dal.findAllLogbookEntries().forEach(dal::deleteLogbookEntry);
 
-			lbRepo.findAll().forEach(lbRepo::delete);
+			// projectRepo.findForProjectLead(empl1).forEach(projectRepo::delete);
 
-//			projectRepo.findForProjectLead(empl1).forEach(projectRepo::delete);
+			dal.assignEmployeeToProject(empl1, project);
+			empl1 = dal.findEmployeeById(empl1.getId());
+			project = dal.findProjectById(project.getId());
 
-			dal.deleteEmployee(empl1);
+			issue = dal.syncIssue(issue);
+			System.out.println("=========== DELETING ISSUE ===========");
+			dal.deleteIssue(issue);
+			System.out.println("=========== DONE DELETING ISSUE ===========");
+
+			Project p2 = new Project("project2", empl1);
+			Module module2 = dal.syncModule(new Module("module"));
+			p2.addModule(module2);
+			p2 = dal.syncProject(p2);
+			module2 = p2.getModules().stream().findFirst().get();
+
+			lb = dal.findAllLogbookEntries().iterator().next();
+
+			issue.addLogbookEntry(lb);
+
+			issue.moveToProject(p2, module2);
+
+			issue = dal.syncIssue(issue);
+
+			// issue.moveToProject(project, module);
+			issue = dal.syncIssue(issue);
+
+			// dal.deleteEmployee(empl1);
 
 		}
 

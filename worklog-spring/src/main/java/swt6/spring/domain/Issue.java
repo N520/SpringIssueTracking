@@ -1,6 +1,8 @@
 package swt6.spring.domain;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -10,6 +12,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
@@ -36,7 +39,7 @@ public class Issue implements Serializable {
 	@Column(nullable = true)
 	private int effort;
 
-	@Column(nullable = false)
+	@Column(nullable = true)
 	private int estimatedTime;
 
 	@Column(length = 3)
@@ -45,20 +48,29 @@ public class Issue implements Serializable {
 	@ManyToOne(optional = true)
 	private Employee employee;
 
-	@ManyToOne(optional = false, cascade = CascadeType.MERGE)
+	@ManyToOne(optional = false)
 	private Project project;
+
+	@OneToMany(cascade = { CascadeType.MERGE, CascadeType.REFRESH }, mappedBy = "issue", orphanRemoval = true)
+	private Set<LogbookEntry> logbookEntries = new HashSet<>();
 
 	public Issue() {
 	}
 
-	public Issue(IssueType state, PriorityType priority, int progress, Employee employee, Project project) {
+	public Issue(IssueType state, PriorityType priority, int progress, int estimatedTime, Employee employee,
+			Project project) {
 		super();
 		this.state = state;
 		this.priority = priority;
 		this.progress = progress;
 		this.employee = employee;
 		this.project = project;
+		this.estimatedTime = estimatedTime;
 		project.addIssue(this);
+	}
+
+	public Issue(Project project) {
+		this(IssueType.NEW, PriorityType.NORMAL, 0, 0, null, project);
 	}
 
 	public IssueType getState() {
@@ -113,6 +125,22 @@ public class Issue implements Serializable {
 		return id;
 	}
 
+	public int getEstimatedTime() {
+		return estimatedTime;
+	}
+
+	public void setEstimatedTime(int estimatedTime) {
+		this.estimatedTime = estimatedTime;
+	}
+
+	public Set<LogbookEntry> getLogbookEntries() {
+		return logbookEntries;
+	}
+
+	public void setLogbookEntries(Set<LogbookEntry> logbookEntries) {
+		this.logbookEntries = logbookEntries;
+	}
+
 	public void attachEmployee(Employee empl) {
 		if (employee != null)
 			employee.removeIssue(this);
@@ -132,30 +160,41 @@ public class Issue implements Serializable {
 
 	/**
 	 * removes the issue from the current project and attaches it to another
+	 * with all corresponding logbookEntries
 	 * 
 	 * @param project
+	 * @param m
+	 *            which module of project the logbookentries should migrate to
 	 */
-	public void moveToProject(Project project) {
+	public void moveToProject(Project project, Module m) {
 		if (project != null) {
 			project.addIssue(this);
 			this.project = project;
+			if (m.getProject() != null && !m.getProject().getId().equals(project.getId()))
+				throw new IllegalArgumentException("project does not contain this model!");
+			getLogbookEntries().forEach(lb -> lb.setModule(m));
 		}
-		if (this.project != null)
+		if (this.project != null) {
 			this.project.removeIssue(this);
+			
+		}
+	}
+
+	public void addLogbookEntry(LogbookEntry lb) {
+		if (lb != null) {
+			if (lb.getIssue() != null) {
+				lb.getIssue().getLogbookEntries().remove(lb);
+			}
+			logbookEntries.add(lb);
+			lb.setIssue(this);
+
+		}
 
 	}
 
 	@Override
 	public String toString() {
 		return "issue " + state + " " + employee;
-	}
-
-	public int getEstimatedTime() {
-		return estimatedTime;
-	}
-
-	public void setEstimatedTime(int estimatedTime) {
-		this.estimatedTime = estimatedTime;
 	}
 
 }

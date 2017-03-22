@@ -36,6 +36,9 @@ public class LogbookEntry implements Serializable {
 	@ManyToOne(optional = false, cascade = { CascadeType.MERGE })
 	private Module module;
 
+	@ManyToOne
+	private Issue issue;
+
 	public LogbookEntry() {
 
 	}
@@ -97,6 +100,14 @@ public class LogbookEntry implements Serializable {
 
 	public void setModule(Module module) {
 		this.module = module;
+	}
+
+	public Issue getIssue() {
+		return issue;
+	}
+
+	public void setIssue(Issue issue) {
+		this.issue = issue;
 	}
 
 	private static final long serialVersionUID = 8497603996267190243L;
