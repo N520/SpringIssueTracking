@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	                    http://www.springframework.org/schema/beans/spring-beans.xsd
+		                  http://www.springframework.org/schema/context 
+		                  http://www.springframework.org/schema/context/spring-context.xsd">
+
+  <!-- <context:annotation-config> is used to activate annotations in beans already 
+       registered in the application context (no matter if they were defined with XML or 
+       by package scanning).
+       <context:component-scan> can also do what <context:annotation-config> does but 
+       <context:component-scan> also scans packages to find and register beans within 
+       the application context.
+   -->
+   
+   <!-- activate automatic bean registration -->
+   <context:component-scan base-package="swt6.spring.basics.ioc" />
+
+   <!-- if class WorkLogImplAnnotationBased is annotated with @Component and
+        <context:component-scan /> is specified in the spring config 
+        the subsequent bean registration is superfluous. 
+   <bean id="workLog" class="swt6.spring.basics.ioc.logic.WorkLogImplIocAnnotationBased" />
+   -->
+
+  <!-- Definition of the beans being injected. If these beans are registered 
+       automatically the explicit definition of these beans is also
+       superfluous.
+
+	<bean id="logger" class="swt6.spring.basics.ioc.util.ConsoleLogger">
+ 		<qualifier type="Log">
+			<attribute key="type" value="STANDARD" />
+		</qualifier>
+	</bean>
+
+ 	<bean id="errorLogger" class="swt6.spring.basics.ioc.util.ConsoleLogger">
+ 		<qualifier type="Log">
+			<attribute key="type" value="ERROR" />
+		</qualifier>
+	  <property name="prefix" value="ErrorLog" />
+	</bean>
+  -->
+</beans>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans.xsd 
+                           http://www.springframework.org/schema/context
+                           http://www.springframework.org/schema/context/spring-context.xsd                  
+                           http://www.springframework.org/schema/aop
+                           http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+	<!-- ==================  enable scanning of annotated aspect implementations ================== -->
+    <!-- enables the use of AspectJ annotations -->
+	<aop:aspectj-autoproxy />
+
+
+	<!-- ==================  definition of target objects and advices ================== -->
+
+  <!-- variant 1: auto register beans with @Component annotation -->
+  <context:component-scan base-package="swt6.spring.basics.aop" /> 
+  
+   
+  <!-- variant 2: register beans explicitly
+	<bean id="workLog" class="swt6.spring.basics.aop.logic.WorkLogImpl" />
+
+	<bean id="profilingAdvice"
+		class="swt6.spring.basics.aop.advice.ProfilingAdvice" />
+
+	<bean id="traceAdvice"
+		class="swt6.spring.basics.aop.advice.TraceAdvice" />
+  -->
+</beans>
