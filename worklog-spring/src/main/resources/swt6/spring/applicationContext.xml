@@ -57,6 +57,7 @@
 		entity-manager-factory-ref="emFactory" transaction-manager-ref="transactionManagerJpa" />
 
 
+
 	<!-- ========================= TRANSACTION DEFINIONS ========================= -->
 	<bean id="transactionManagerJpa" class="org.springframework.orm.jpa.JpaTransactionManager">
 		<property name="entityManagerFactory" ref="emFactory"></property>
@@ -64,18 +65,11 @@
 	<!-- +++++++++++++++++++++ Annotation based definition of Transaktions ++++++++++++++++++++ -->
 	<!-- requires @Tansactinal on bl objects -->
 	<tx:annotation-driven transaction-manager="transactionManagerJpa" />
-	
-		<bean id="jpaInterceptor" class="swt6.spring.util.advice.JpaInterceptor">
+
+	<bean id="jpaInterceptor" class="swt6.spring.util.advice.JpaInterceptor">
 		<property name="entityManagerFactory" ref="emFactory"></property>
 	</bean>
 	<aop:aspectj-autoproxy />
 
-	<aop:config>
-		<aop:aspect id="jpaInterceptor" ref="jpaInterceptor">
-			<aop:around
-				pointcut="execution(private * swt6.spring.client.DummyClient.test*(..))"
-				method="holdEntityManger" />
-		</aop:aspect>
-	</aop:config>
-	
+
 </beans>

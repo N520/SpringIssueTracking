@@ -24,7 +24,7 @@ public class JpaInterceptor {
 		this.entityManagerFactory = emFactory;
 	}
 
-	@Around("execution(* swt6.spring.client.InteractiveClient.*(..))")
+	@Around("execution( public * swt6.spring.client.WorkLogFacadeImpl.*(..))")
 	public Object holdEntityManger(ProceedingJoinPoint pjp) throws Throwable {
 		System.err.println("ENTERING -dasödlasödk");
 		if (entityManagerFactory == null)

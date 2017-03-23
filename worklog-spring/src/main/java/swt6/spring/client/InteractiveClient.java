@@ -22,8 +22,6 @@ public class InteractiveClient {
 
 	private static final String configFile = "swt6/spring/applicationContext.xml";
 
-	private static IssueTrackingDal dal;
-
 	static String promptFor(BufferedReader in, String p) {
 		System.out.print(p + "> ");
 		try {
@@ -41,8 +39,8 @@ public class InteractiveClient {
 				+ "update entry, list issues project, list worktime project, help, quit";
 
 		try (AbstractApplicationContext appCtx = new ClassPathXmlApplicationContext(configFile)) {
-
-			init(dfmt, appCtx);
+			WorkLogFacade dal = appCtx.getBean("workLog", WorkLogFacade.class);
+			init(dfmt, dal);
 
 			System.out.println("Hibernate Employee Admin");
 			System.out.println(availCmds);
@@ -51,7 +49,7 @@ public class InteractiveClient {
 				switch (userCmd) {
 				case "insert p employee":
 					try {
-						saveEmployee(new PermanentEmployee(promptFor(in, "firstName"), promptFor(in, "lastName"),
+						dal.saveEmployee(new PermanentEmployee(promptFor(in, "firstName"), promptFor(in, "lastName"),
 								dfmt.parse(promptFor(in, "dob (dd.mm.yyyy)")),
 								new Address(promptFor(in, "zipCode"), promptFor(in, "city"), promptFor(in, "street")),
 								Integer.parseInt(promptFor(in, "salary"))));
@@ -64,7 +62,7 @@ public class InteractiveClient {
 
 				case "insert t employee":
 					try {
-						saveEmployee(new TemporaryEmployee(promptFor(in, "firstName"), promptFor(in, "lastName"),
+						dal.saveEmployee(new TemporaryEmployee(promptFor(in, "firstName"), promptFor(in, "lastName"),
 								dfmt.parse(promptFor(in, "dob (dd.mm.yyyy)")),
 								new Address(promptFor(in, "zipCode"), promptFor(in, "city"), promptFor(in, "street")),
 								promptFor(in, "renter"), Integer.parseInt(promptFor(in, "rate")),
@@ -79,14 +77,14 @@ public class InteractiveClient {
 				case "list employee":
 					String strId = promptFor(in, "id (no input lists all)");
 
-					listEmployees(strId);
+					dal.listEmployees(strId);
 
 					userCmd = promptFor(in, "");
 					break;
 
 				case "list project":
 					strId = promptFor(in, "id (no input lists all)");
-					listProjects(strId);
+					dal.listProjects(strId);
 
 					userCmd = promptFor(in, "");
 					break;
@@ -95,7 +93,7 @@ public class InteractiveClient {
 					Long employeeId = Long.parseLong(promptFor(in, "employeeId"));
 					Long projectId = Long.parseLong(promptFor(in, "projectId"));
 
-					addEmployeeToProject(employeeId, projectId);
+					dal.addEmployeeToProject(employeeId, projectId);
 
 					userCmd = promptFor(in, "");
 					break;
@@ -129,7 +127,7 @@ public class InteractiveClient {
 					break;
 
 				case "list issues project":
-					listIssuesForProject(Long.parseLong(promptFor(in, "project id")));
+					dal.listIssuesForProject(Long.parseLong(promptFor(in, "project id")));
 
 					userCmd = promptFor(in, "");
 					break;
@@ -153,83 +151,83 @@ public class InteractiveClient {
 		}
 	}
 
-	private static void listProjects(String strId) {
-		if (strId.equals(""))
-			dal.findAllProjects().forEach(System.out::println);
-		else {
-			Long id;
-			try {
-				id = Long.parseLong(strId);
-			} catch (NumberFormatException e) {
-				System.err.println("invalid id" + strId);
-				return;
-			}
-			System.out.println(dal.findProjectById(id));
-		}
-	}
-
-	private static void addEmployeeToProject(Long employeeId, Long projectId) {
-		Employee e = dal.findEmployeeById(employeeId);
-		Project p = dal.findProjectById(projectId);
-		if (e == null) {
-			System.err.println("no employee with id" + employeeId);
-			return;
-		}
-		if (p == null) {
-			System.err.println("no employee with id" + projectId);
-			return;
-		}
-		dal.assignEmployeeToProject(e, p);
-
-		System.out.println("employees working on " + p + ":");
-		p.getMembers().forEach(System.out::println);
-
-	}
-
-	private static void init(DateFormat dfmt, AbstractApplicationContext appCtx) {
-		dal = appCtx.getBean(IssueTrackingDal.class);
+	// private static void listProjects(String strId) {
+	// if (strId.equals(""))
+	// dal.findAllProjects().forEach(System.out::println);
+	// else {
+	// Long id;
+	// try {
+	// id = Long.parseLong(strId);
+	// } catch (NumberFormatException e) {
+	// System.err.println("invalid id" + strId);
+	// return;
+	// }
+	// System.out.println(dal.findProjectById(id));
+	// }
+	// }
+	//
+	// private static void addEmployeeToProject(Long employeeId, Long projectId)
+	// {
+	// Employee e = dal.findEmployeeById(employeeId);
+	// Project p = dal.findProjectById(projectId);
+	// if (e == null) {
+	// System.err.println("no employee with id" + employeeId);
+	// return;
+	// }
+	// if (p == null) {
+	// System.err.println("no employee with id" + projectId);
+	// return;
+	// }
+	// dal.assignEmployeeToProject(e, p);
+	//
+	// System.out.println("employees working on " + p + ":");
+	// p.getMembers().forEach(System.out::println);
+	//
+	// }
+	//
+	private static void init(DateFormat dfmt, WorkLogFacade dal) {
 		try {
-			Employee empl1 = dal.syncEmployee(new PermanentEmployee("Jack", "black", dfmt.parse("01.01.1993"),
+			Employee empl1 = dal.saveEmployee(new PermanentEmployee("Jack", "black", dfmt.parse("01.01.1993"),
 					new Address("4300", "sdas", "1231"), 20000));
 
-			dal.syncEmployee(new PermanentEmployee("Jane", "Corsair", dfmt.parse("01.01.1993"),
+			dal.saveEmployee(new PermanentEmployee("Jane", "Corsair", dfmt.parse("01.01.1993"),
 					new Address("4300", "sdas", "1231"), 27000));
 
-			dal.syncEmployee(new PermanentEmployee("Lucky", "Bolero", dfmt.parse("01.01.1989"),
+			dal.saveEmployee(new PermanentEmployee("Lucky", "Bolero", dfmt.parse("01.01.1989"),
 					new Address("4300", "sdas", "1231"), 10000));
 
-			dal.syncEmployee(new PermanentEmployee("Daniel", "Raptor", dfmt.parse("01.01.1983"),
+			dal.saveEmployee(new PermanentEmployee("Daniel", "Raptor", dfmt.parse("01.01.1983"),
 					new Address("4300", "sdas", "1231"), 30000));
 
-			Project p = dal.syncProject(new Project("Project Orange", empl1));
-			Issue i = dal.syncIssue(new Issue(p));
+			Project p = dal.saveProject(new Project("Project Orange", empl1));
+			Issue i = dal.saveIssue(new Issue(p));
 
 		} catch (ParseException e1) {
 		}
 	}
-
-	private static void listIssuesForProject(Long id) {
-		dal.findAllIssuesForPoject(dal.findProjectById(id)).forEach(System.out::println);
-	}
-
-	private static void listEmployees(String strId) {
-		if (strId.equals(""))
-			dal.findAllEmployees().forEach(System.out::println);
-		else {
-			Long id;
-			try {
-				id = Long.parseLong(strId);
-			} catch (NumberFormatException e) {
-				System.err.println("invalid id" + strId);
-				return;
-			}
-			System.out.println(dal.findEmployeeById(id));
-		}
-
-	}
-
-	private static void saveEmployee(Employee employee) {
-		dal.syncEmployee(employee);
-	}
+	//
+	// private static void listIssuesForProject(Long id) {
+	// dal.findAllIssuesForPoject(dal.findProjectById(id)).forEach(System.out::println);
+	// }
+	//
+	// private static void listEmployees(String strId) {
+	// if (strId.equals(""))
+	// dal.findAllEmployees().forEach(System.out::println);
+	// else {
+	// Long id;
+	// try {
+	// id = Long.parseLong(strId);
+	// } catch (NumberFormatException e) {
+	// System.err.println("invalid id" + strId);
+	// return;
+	// }
+	// System.out.println(dal.findEmployeeById(id));
+	// }
+	//
+	// }
+	//
+	// private static void saveEmployee(Employee employee) {
+	// dal.syncEmployee(employee);
+	// }
 
 }

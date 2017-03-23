@@ -12,7 +12,7 @@ import swt6.spring.domain.Employee;
 import swt6.spring.domain.Project;
 
 @Repository("emplRepo")
-public interface EmployeeRepository extends JpaRepository<Employee, Long> {
+public interface EmployeeRepository extends JpaRepository<Employee, Long>, EmployeeRepositoryCustom {
 	Employee findByLastName(String lastName);
 
 	@Query("from Employee e where e.lastName like %:substr%")

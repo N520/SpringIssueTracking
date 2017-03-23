@@ -2,9 +2,9 @@ package swt6.spring.logic;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
-import javax.persistence.EntityManagerFactory;
-
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +34,6 @@ public class IssueTrackingDal {
 	private ProjectRepository projectRepo;
 	@Autowired
 	private IssueRepository issueRepo;
-
 
 	// Employee methods
 	// -------------------------------------------------------------------------------------------------------------
@@ -68,7 +67,6 @@ public class IssueTrackingDal {
 		return emplRepo.findByLastNameContaining(lastName);
 	}
 
-	
 	// END Employee methods
 	// -------------------------------------------------------------------------------------------------------------
 
@@ -81,7 +79,13 @@ public class IssueTrackingDal {
 
 	@Transactional
 	public void assignEmployeeToProject(Employee employee, Project project) {
-		project.addMember(employee);
+		if (employee == null)
+			throw new IllegalArgumentException("employee must not be null");
+
+		employee.getProjects().add(project);
+		Set<Employee> members = project.getMembers();
+		Hibernate.initialize(members);
+		members.add(employee);
 		emplRepo.save(employee);
 		projectRepo.save(project);
 	}
@@ -190,13 +194,11 @@ public class IssueTrackingDal {
 			throw new IllegalStateException("cannot add logbookentry to unassigned issue");
 		issue.addLogbookEntry(lb);
 
-		
 		issue.getProject().removeLogbookEntry(lb);
 
 		syncIssue(issue);
 		syncLogbookEntry(lb);
 	}
-
 
 	/**
 	 * assigns an issue to a project. Any previously existing reference to other
