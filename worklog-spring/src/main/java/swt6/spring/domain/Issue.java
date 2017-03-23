@@ -171,17 +171,11 @@ public class Issue implements Serializable {
 		if (project != null) {
 			project.addIssue(this);
 			this.project = project;
-			getLogbookEntries().forEach(lb -> {
-				lb.setProject(project);
-				project.addLogBookEntry(lb);
-			});
+
 		}
 		if (this.project != null) {
 			this.project.removeIssue(this);
-			getLogbookEntries().forEach(lb -> {
-				lb.setProject(null);
-				project.removeLogbookEntry(lb);
-			});
+
 		}
 	}
 

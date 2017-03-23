@@ -65,8 +65,8 @@ public class DummyClient {
 			List<LogbookEntry> l = dal.findAllLogbookEntriesForProject(project);
 			System.out.println(l.size());
 			System.out.println("PRINTING ISSUE ---------------------------------");
-		
 
+			
 		}
 
 	}

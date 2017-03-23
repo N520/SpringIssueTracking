@@ -70,6 +70,7 @@ public class IssueTrackingDal {
 		return emplRepo.findByLastNameContaining(lastName);
 	}
 
+	
 	// END Employee methods
 	// -------------------------------------------------------------------------------------------------------------
 
@@ -132,11 +133,17 @@ public class IssueTrackingDal {
 	@Transactional
 	public void deleteIssue(Issue issue) {
 
-		issue.getLogbookEntries().forEach(this::deleteLogbookEntry);
+		findLogbookEntriesForIssue(issue).forEach(this::deleteLogbookEntry);
 
 		issue.moveToProject(null);
 		issue.detachEmployee();
 		issueRepo.delete(issue);
+	}
+
+	@Transactional(readOnly = true)
+	public List<LogbookEntry> findLogbookEntriesForIssue(Issue issue) {
+		return lbRepo.findForIssue(issue);
+
 	}
 
 	@Transactional(readOnly = true)
@@ -185,7 +192,7 @@ public class IssueTrackingDal {
 			throw new IllegalStateException("cannot add logbookentry to unassigned issue");
 		issue.addLogbookEntry(lb);
 
-		// issue.getProject().addLogBookEntry(lb);
+		issue.getProject().removeLogbookEntry(lb);
 
 		syncIssue(issue);
 		syncLogbookEntry(lb);
@@ -253,7 +260,7 @@ public class IssueTrackingDal {
 	}
 
 	@Transactional(readOnly = true)
-	public Iterable<LogbookEntry> findAllLogbookEntries() {
+	public List<LogbookEntry> findAllLogbookEntries() {
 		return lbRepo.findAll();
 	}
 

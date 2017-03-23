@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+		http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+	<!-- ========================= RESOURCE DEFINITIONS ========================= -->
+
+	<!-- Configurer that replaces ${...} placeholders with values from a properties 
+		file -->
+	<context:property-placeholder location="swt6/spring/jpa.properties" />
+
+	<!-- Definion of local datasource. Uses Apache Commons DBCP for connection 
+		pooling. See Commons DBCP documentation for the required JAR files. See the 
+		PetStore sample application also shipped with Spring, for an example of Commons 
+		DBCP usage and the necessary build script. Alternatively you can use another 
+		connection pool such as C3P0, similarly configured using Spring. A standalone 
+		connection pool such as Commons DBCP is a good choice for use outside an 
+		application server environment, including web applications running in a web 
+		container without JTA, or integration testing using the org.springframework.test 
+		package. -->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="${database.driverClassName}" />
+		<property name="url" value="${database.url}" />
+		<property name="username" value="${database.username}" />
+		<property name="password" value="${database.password}" />
+	</bean>
+
+	<bean id="emFactory"
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="packagesToScan" value="swt6.spring.domain" />
+		<property name="jpaVendorAdapter">
+			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter" />
+		</property>
+		<property name="jpaProperties">
+			<props>
+				<prop key="hibernate.dialect">${hibernate.dialect}</prop>
+				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.format_sql">false</prop>
+				<prop key="hibernate.hbm2ddl.auto">create</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean
+		class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor" />
+
+	<bean id="dal" class="swt6.spring.logic.IssueTrackingDal"></bean>
+
+	<bean id="issue" class="swt6.spring.domain.Issue">
+		<property name="project" ref="project"></property>
+	</bean>
+
+	<bean id="project" class="swt6.spring.domain.Project">
+		<property name="projectLeader" ref="empl1"></property>
+		<property name="name" value="super awesome cotton project"></property>
+	</bean>
+
+	<bean id="address" class="swt6.spring.domain.Address">
+		<property name="city" value="Los Angeles" />
+		<property name="street" value="Hollywood 3" />
+		<property name="zipCode" value="6969"></property>
+	</bean>
+
+	<bean id="empl1" class="swt6.spring.domain.PermanentEmployee">
+		<property name="firstName" value="Jack" />
+		<property name="lastName" value="Nicholson" />
+		<property name="salary" value="20000" />
+		<property name="address" ref="address"></property>
+	</bean>
+
+
+	<bean id="empl2" class="swt6.spring.domain.PermanentEmployee">
+		<property name="firstName" value="Hugh" />
+		<property name="lastName" value="Jackman" />
+		<property name="salary" value="20000" />
+		<property name="address" ref="address"></property>
+	</bean>
+
+
+
+	<jpa:repositories base-package="swt6.spring.dao"
+		entity-manager-factory-ref="emFactory" transaction-manager-ref="transactionManagerJpa" />
+
+
+	<!-- ========================= TRANSACTION DEFINIONS ========================= -->
+	<bean id="transactionManagerJpa" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="emFactory"></property>
+	</bean>
+	<!-- +++++++++++++++++++++ Annotation based definition of Transaktions ++++++++++++++++++++ -->
+	<!-- requires @Tansactinal on bl objects -->
+	<tx:annotation-driven transaction-manager="transactionManagerJpa" />
+</beans>

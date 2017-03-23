@@ -109,13 +109,16 @@ public class Project implements Serializable {
 		getEntries().add(lb);
 		lb.setProject(this);
 	}
-	
+
 	public void removeLogbookEntry(LogbookEntry lb) {
 		if (lb == null)
 			throw new IllegalArgumentException("logbookEntry must not be null");
-		getIssues().remove(lb);		
+		for (LogbookEntry entry : getEntries()) {
+			if (entry.getId().equals(lb.getId()))
+				getEntries().remove(entry);
+		}
+		lb.setProject(null);
 	}
-
 
 	public void addIssue(Issue issue) {
 		if (issue == null)
@@ -156,6 +159,5 @@ public class Project implements Serializable {
 	public void setEntries(Set<LogbookEntry> entries) {
 		this.entries = entries;
 	}
-
 
 }
