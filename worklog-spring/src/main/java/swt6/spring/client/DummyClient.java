@@ -1,6 +1,7 @@
 package swt6.spring.client;
 
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -53,32 +54,18 @@ public class DummyClient {
 
 			lb = dal.findAllLogbookEntries().iterator().next();
 
-//			issue.addLogbookEntry(lb);
+			// issue.addLogbookEntry(lb);
 			issue = dal.syncIssue(new Issue(project));
 			dal.addLogbookEntryToIssue(lb, issue);
+
+			System.out.println("PRINTING ISSUE ---------------------------------");
 			
-			dal.addLogbookEntryToProject(lb, p2);
-
-//			issue.moveToProject(p2);
-
-//			issue = dal.syncIssue(issue);
-
-			// issue.moveToProject(project, module);
-//			issue = dal.syncIssue(issue);
-
-//			dal.assignIssueToEmployee(issue, empl1);
-
-			empl1 = dal.findEmployeeById(empl1.getId());
-//
-//			dal.findAllLogbookEntriesForProject(project).forEach(dal::deleteLogbookEntry);
-//			dal.deleteProject(project);
-//			dal.deleteIssue(issue);
-
-			// dal.findAllProjects().forEach(dal::deleteProject);
-
-			// dal.deleteEmployee(empl1);
-
-			// dal.deleteEmployee(empl1);
+			lb = dal.findLogbookEntryById(4L);
+			dal.addLogbookEntryToProject(lb, project);
+			List<LogbookEntry> l = dal.findAllLogbookEntriesForProject(project);
+			System.out.println(l.size());
+			System.out.println("PRINTING ISSUE ---------------------------------");
+		
 
 		}
 

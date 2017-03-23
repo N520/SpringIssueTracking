@@ -3,7 +3,6 @@ package swt6.spring.logic;
 import java.util.Date;
 import java.util.List;
 
-import javax.inject.Named;
 import javax.persistence.EntityManagerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +19,6 @@ import swt6.spring.domain.IssueType;
 import swt6.spring.domain.LogbookEntry;
 import swt6.spring.domain.Phase;
 import swt6.spring.domain.Project;
-import swt6.util.JpaUtil;
 
 @Component("issueDal")
 @Transactional
@@ -151,9 +149,13 @@ public class IssueTrackingDal {
 		return issueRepo.findAll();
 	}
 
-	// TODO addLogbookEntryToIssue throw exception if issue not assigned to
-	// project ( use addLogbookEntryToProject(Projcet p, module m))
-	// if adding lb to issue and issue has project also add lb to project/module
+	/**
+	 * adds a logbookentry to a project and removes its reference to any issue
+	 * which it has been assigned to.
+	 * 
+	 * @param lb
+	 * @param project
+	 */
 	@Transactional
 	public void addLogbookEntryToProject(LogbookEntry lb, Project project) {
 		Issue issue = lb.getIssue();
@@ -168,19 +170,43 @@ public class IssueTrackingDal {
 
 	}
 
+	/**
+	 * assignd a {@link LogbookEntry} to a {@link Issue}. If the issue has not
+	 * been assigned to a project an {@link IllegalStateException} is thrown. An
+	 * Issue can either be assigned to a project or an issue
+	 * 
+	 * @param lb
+	 * @param issue
+	 * @throws IllegalStateException
+	 */
 	@Transactional
 	public void addLogbookEntryToIssue(LogbookEntry lb, Issue issue) {
 		if (issue.getProject() == null)
 			throw new IllegalStateException("cannot add logbookentry to unassigned issue");
 		issue.addLogbookEntry(lb);
 
-		issue.getProject().addLogBookEntry(lb);
+		// issue.getProject().addLogBookEntry(lb);
 
 		syncIssue(issue);
 		syncLogbookEntry(lb);
 	}
 	// TODO moveIssueToProject
 	// handeled in Issue.moveToProject
+
+	/**
+	 * assigns an issue to a project. Any previously existing reference to other
+	 * projects is overwritten. An Issue can either be assigned to a project or
+	 * an issue
+	 * 
+	 * @param issue
+	 * @param project
+	 */
+	@Transactional
+	public void assignIssueToProject(Issue issue, Project project) {
+		issue.moveToProject(project);
+		lbRepo.save(lbRepo.findForIssue(issue));
+		syncIssue(issue);
+	}
 
 	/**
 	 * assigns an employee to the issue and also allows to update the issues
@@ -231,9 +257,23 @@ public class IssueTrackingDal {
 		return lbRepo.findAll();
 	}
 
+	/**
+	 * finds all logbookEntries for a project and all logbookeEntries assigned
+	 * to the issues, which are assigned to said project
+	 * 
+	 * @param project
+	 * @return
+	 */
 	@Transactional(readOnly = true)
 	public List<LogbookEntry> findAllLogbookEntriesForProject(Project project) {
-		return lbRepo.findForProject(project);
+		List<LogbookEntry> l;
+		l = lbRepo.findForProject(project);
+		for (Issue i : project.getIssues()) {
+			l.addAll(lbRepo.findForIssue(i));
+		}
+
+		return l;
+
 	}
 
 	@Transactional
@@ -262,6 +302,10 @@ public class IssueTrackingDal {
 		lb.setPhase(phase);
 		return lb;
 
+	}
+
+	public LogbookEntry findLogbookEntryById(long id) {
+		return lbRepo.findOne(id);
 	}
 
 	// END Logbookentries methods

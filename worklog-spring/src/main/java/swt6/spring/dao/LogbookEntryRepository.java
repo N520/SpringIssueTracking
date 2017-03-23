@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import swt6.spring.domain.Employee;
+import swt6.spring.domain.Issue;
 import swt6.spring.domain.LogbookEntry;
 import swt6.spring.domain.Project;
 
@@ -15,7 +16,10 @@ import swt6.spring.domain.Project;
 public interface LogbookEntryRepository extends JpaRepository<LogbookEntry, Long> {
 	@Query("from LogbookEntry lb where lb.employee = :employee")
 	List<LogbookEntry> findForEmployee(@Param("employee") Employee employee);
-	
+
 	@Query("from LogbookEntry lb where lb.project = :project")
 	List<LogbookEntry> findForProject(@Param("project") Project project);
+
+	@Query("from LogbookEntry lb where lb.issue = :issue")
+	List<LogbookEntry> findForIssue(@Param("issue") Issue issue);
 }

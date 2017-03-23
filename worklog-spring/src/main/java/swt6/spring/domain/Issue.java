@@ -161,7 +161,6 @@ public class Issue implements Serializable {
 
 	/**
 	 * removes the issue from the current project and attaches it to another
-	 * with all corresponding logbookEntries
 	 * 
 	 * @param project
 	 * @param m
@@ -172,11 +171,17 @@ public class Issue implements Serializable {
 		if (project != null) {
 			project.addIssue(this);
 			this.project = project;
-			getLogbookEntries().forEach(lb -> lb.setProject(project));
+			getLogbookEntries().forEach(lb -> {
+				lb.setProject(project);
+				project.addLogBookEntry(lb);
+			});
 		}
 		if (this.project != null) {
 			this.project.removeIssue(this);
-			getLogbookEntries().forEach(lb -> lb.setProject(null));
+			getLogbookEntries().forEach(lb -> {
+				lb.setProject(null);
+				project.removeLogbookEntry(lb);
+			});
 		}
 	}
 
