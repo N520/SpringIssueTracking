@@ -153,6 +153,19 @@ public class IssueTrackingDal {
 	// TODO addLogbookEntryToIssue throw exception if issue not assigned to
 	// project ( use addLogbookEntryToProject(Projcet p, module m))
 	// if adding lb to issue and issue has project also add lb to project/module
+	@Transactional
+	public void addLogbookEntryToProject(LogbookEntry lb, Module module) {
+
+	}
+
+	@Transactional
+	public void addLogbookEntryToIssue(LogbookEntry lb, Issue issue) {
+		if (issue.getProject() == null)
+			throw new IllegalStateException("cannot add logbookentry to unassigned issue");
+		issue.addLogbookEntry(lb);
+		issue = syncIssue(issue);
+		lb = syncLogbookEntry(lb);
+	}
 	// TODO moveIssueToProject
 	// handeled in Issue.moveToProject
 
