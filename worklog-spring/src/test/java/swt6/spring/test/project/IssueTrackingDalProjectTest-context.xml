@@ -97,4 +97,16 @@
 	<!-- +++++++++++++++++++++ Annotation based definition of Transaktions ++++++++++++++++++++ -->
 	<!-- requires @Tansactinal on bl objects -->
 	<tx:annotation-driven transaction-manager="transactionManagerJpa" />
+
+	<bean id="jpaInterceptor" class="swt6.util.advice.JpaInterceptor">
+		<property name="entityManagerFactory" ref="emFactory"></property>
+	</bean>
+
+	<aop:config>
+		<aop:aspect id="jpaInterceptor" ref="jpaInterceptor">
+			<aop:around
+				pointcut="execution(public * swt6.spring.test..*(..))"
+				method="holdEntityManger" />
+		</aop:aspect>
+	</aop:config>
 </beans>

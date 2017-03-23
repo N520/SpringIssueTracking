@@ -17,6 +17,7 @@ import swt6.spring.domain.Employee;
 import swt6.spring.domain.Issue;
 import swt6.spring.domain.Project;
 import swt6.spring.logic.IssueTrackingDal;
+import swt6.util.JpaUtil;
 
 @ContextConfiguration
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -58,7 +59,8 @@ public class IssueTrackingDalProjectTest {
 		project = dal.syncProject(project);
 		dal.assignEmployeeToProject(empl1, project);
 		project = dal.findProjectById(project.getId());
-		assertEquals(1, project.getMembers().size());
+		JpaUtil.executeInOpenEntityManager(emFactory, () -> assertEquals(1, project.getMembers().size()));
+		
 		dal.unassignEmployeeFromProject(empl1, project);
 		project = dal.findProjectById(project.getId());
 		assertEquals(0, project.getMembers().size());

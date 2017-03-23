@@ -38,7 +38,7 @@ public class Project implements Serializable {
 	@JoinColumn(name = "projectLead")
 	private Employee projectLeader;
 
-	@OneToMany(mappedBy = "project", fetch = FetchType.EAGER)
+	@OneToMany(mappedBy = "project", fetch=FetchType.EAGER)
 	private Set<LogbookEntry> entries = new HashSet<>();
 
 	public Long getId() {

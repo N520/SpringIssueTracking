@@ -193,7 +193,8 @@ public class Issue implements Serializable {
 
 	@Override
 	public String toString() {
-		return "issue " + state + " " + employee;
+		String employeeStr =  employee == null ? "nobody" : employee.toString();
+		return state + " issue assigned to " + employeeStr;
 	}
 
 }

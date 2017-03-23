@@ -3,6 +3,8 @@ package swt6.spring.client;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.EntityManagerFactory;
+
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -13,6 +15,7 @@ import swt6.spring.domain.LogbookEntry;
 import swt6.spring.domain.PermanentEmployee;
 import swt6.spring.domain.Project;
 import swt6.spring.logic.IssueTrackingDal;
+import swt6.util.JpaUtil;
 
 public class DummyClient {
 
@@ -56,17 +59,20 @@ public class DummyClient {
 
 			// issue.addLogbookEntry(lb);
 			issue = dal.syncIssue(new Issue(project));
-			dal.addLogbookEntryToIssue(lb, issue);
+			LogbookEntry lb2 = dal.createLogbookEntry(new Date(), new Date(), empl1);
+			Issue issue2 = issue;
+			dal.addLogbookEntryToIssue(lb2, issue2);
 
 			System.out.println("PRINTING ISSUE ---------------------------------");
-			
+
 			lb = dal.findLogbookEntryById(4L);
 			dal.addLogbookEntryToProject(lb, project);
 			List<LogbookEntry> l = dal.findAllLogbookEntriesForProject(project);
 			System.out.println(l.size());
 			System.out.println("PRINTING ISSUE ---------------------------------");
 
-			
+			issue.getProject().getEntries().forEach(System.out::println);
+
 		}
 
 	}

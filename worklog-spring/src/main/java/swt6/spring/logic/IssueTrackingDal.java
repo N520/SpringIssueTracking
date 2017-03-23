@@ -35,8 +35,6 @@ public class IssueTrackingDal {
 	@Autowired
 	private IssueRepository issueRepo;
 
-	@Autowired
-	private EntityManagerFactory emFactory;
 
 	// Employee methods
 	// -------------------------------------------------------------------------------------------------------------
@@ -192,13 +190,13 @@ public class IssueTrackingDal {
 			throw new IllegalStateException("cannot add logbookentry to unassigned issue");
 		issue.addLogbookEntry(lb);
 
+		
 		issue.getProject().removeLogbookEntry(lb);
 
 		syncIssue(issue);
 		syncLogbookEntry(lb);
 	}
-	// TODO moveIssueToProject
-	// handeled in Issue.moveToProject
+
 
 	/**
 	 * assigns an issue to a project. Any previously existing reference to other
