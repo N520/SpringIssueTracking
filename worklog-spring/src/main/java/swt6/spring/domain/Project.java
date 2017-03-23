@@ -15,7 +15,10 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.Cascade;
+
+import swt6.util.JpaUtil;
 
 @Entity
 public class Project implements Serializable {
@@ -28,7 +31,7 @@ public class Project implements Serializable {
 	@Column(nullable = false, length = 50)
 	private String name;
 
-	@ManyToMany(fetch = FetchType.EAGER)
+	@ManyToMany(fetch = FetchType.LAZY)
 	private Set<Employee> members = new HashSet<>();
 
 	@OneToMany(mappedBy = "project", fetch = FetchType.EAGER)
@@ -38,7 +41,7 @@ public class Project implements Serializable {
 	@JoinColumn(name = "projectLead")
 	private Employee projectLeader;
 
-	@OneToMany(mappedBy = "project", fetch=FetchType.EAGER)
+	@OneToMany(mappedBy = "project", fetch = FetchType.EAGER)
 	private Set<LogbookEntry> entries = new HashSet<>();
 
 	public Long getId() {
@@ -80,6 +83,7 @@ public class Project implements Serializable {
 	public void addMember(Employee empl) {
 		if (empl == null)
 			throw new IllegalArgumentException("employee must not be null");
+	
 		empl.getProjects().add(this);
 		this.members.add(empl);
 	}
@@ -100,7 +104,7 @@ public class Project implements Serializable {
 	}
 
 	public String toString() {
-		return name;
+		return getId() + ": " + name;
 	}
 
 	public void addLogBookEntry(LogbookEntry lb) {

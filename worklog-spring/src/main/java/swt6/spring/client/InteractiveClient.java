@@ -38,27 +38,11 @@ public class InteractiveClient {
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		String availCmds = "======= Issue Tracking =======\ncommands: insert p employee, insert t employee, list employee, insert project, list project, \n"
 				+ "add employee project, remove employee project, insert issue, update issue, insert entry, \n"
-				+ "update entry, list issue project, list worktime project, help";
+				+ "update entry, list issues project, list worktime project, help, quit";
+
 		try (AbstractApplicationContext appCtx = new ClassPathXmlApplicationContext(configFile)) {
-			dal = appCtx.getBean(IssueTrackingDal.class);
-			try {
-				Employee empl1 = dal.syncEmployee(new PermanentEmployee("Jack", "black", dfmt.parse("01.01.1993"),
-						new Address("4300", "sdas", "1231"), 20000));
 
-				dal.syncEmployee(new PermanentEmployee("Jane", "Corsair", dfmt.parse("01.01.1993"),
-						new Address("4300", "sdas", "1231"), 27000));
-
-				dal.syncEmployee(new PermanentEmployee("Lucky", "Bolero", dfmt.parse("01.01.1989"),
-						new Address("4300", "sdas", "1231"), 10000));
-
-				dal.syncEmployee(new PermanentEmployee("Daniel", "Raptor", dfmt.parse("01.01.1983"),
-						new Address("4300", "sdas", "1231"), 30000));
-
-				Project p = dal.syncProject(new Project("Project Orange", empl1));
-				Issue i = dal.syncIssue(new Issue(p));
-
-			} catch (ParseException e1) {
-			}
+			init(dfmt, appCtx);
 
 			System.out.println("Hibernate Employee Admin");
 			System.out.println(availCmds);
@@ -100,7 +84,18 @@ public class InteractiveClient {
 					userCmd = promptFor(in, "");
 					break;
 
+				case "list project":
+					strId = promptFor(in, "id (no input lists all)");
+					listProjects(strId);
+
+					userCmd = promptFor(in, "");
+					break;
+
 				case "add employee project":
+					Long employeeId = Long.parseLong(promptFor(in, "employeeId"));
+					Long projectId = Long.parseLong(promptFor(in, "projectId"));
+
+					addEmployeeToProject(employeeId, projectId);
 
 					userCmd = promptFor(in, "");
 					break;
@@ -155,23 +150,61 @@ public class InteractiveClient {
 				}
 			}
 
-			IssueTrackingDal dal = appCtx.getBean(IssueTrackingDal.class);
+		}
+	}
 
-			Employee empl = dal.syncEmployee(
-					new PermanentEmployee("Ben", "Stiller", new Date(), new Address("4300", "sdas", "asd"), 20000));
-			Employee empl2 = dal.syncEmployee(
-					new PermanentEmployee("Jasmine", "Alakart", new Date(), new Address("4300", "sdas", "asd"), 20000));
-			Project p = dal.syncProject(new Project("name", empl));
-			dal.assignEmployeeToProject(empl, p);
-			p = dal.findProjectById(p.getId());
-			dal.assignEmployeeToProject(empl2, p);
-
-			p = dal.findProjectById(p.getId());
-
-			for (Employee e : p.getMembers()) {
-				System.out.println(e);
+	private static void listProjects(String strId) {
+		if (strId.equals(""))
+			dal.findAllProjects().forEach(System.out::println);
+		else {
+			Long id;
+			try {
+				id = Long.parseLong(strId);
+			} catch (NumberFormatException e) {
+				System.err.println("invalid id" + strId);
+				return;
 			}
+			System.out.println(dal.findProjectById(id));
+		}
+	}
 
+	private static void addEmployeeToProject(Long employeeId, Long projectId) {
+		Employee e = dal.findEmployeeById(employeeId);
+		Project p = dal.findProjectById(projectId);
+		if (e == null) {
+			System.err.println("no employee with id" + employeeId);
+			return;
+		}
+		if (p == null) {
+			System.err.println("no employee with id" + projectId);
+			return;
+		}
+		dal.assignEmployeeToProject(e, p);
+
+		System.out.println("employees working on " + p + ":");
+		p.getMembers().forEach(System.out::println);
+
+	}
+
+	private static void init(DateFormat dfmt, AbstractApplicationContext appCtx) {
+		dal = appCtx.getBean(IssueTrackingDal.class);
+		try {
+			Employee empl1 = dal.syncEmployee(new PermanentEmployee("Jack", "black", dfmt.parse("01.01.1993"),
+					new Address("4300", "sdas", "1231"), 20000));
+
+			dal.syncEmployee(new PermanentEmployee("Jane", "Corsair", dfmt.parse("01.01.1993"),
+					new Address("4300", "sdas", "1231"), 27000));
+
+			dal.syncEmployee(new PermanentEmployee("Lucky", "Bolero", dfmt.parse("01.01.1989"),
+					new Address("4300", "sdas", "1231"), 10000));
+
+			dal.syncEmployee(new PermanentEmployee("Daniel", "Raptor", dfmt.parse("01.01.1983"),
+					new Address("4300", "sdas", "1231"), 30000));
+
+			Project p = dal.syncProject(new Project("Project Orange", empl1));
+			Issue i = dal.syncIssue(new Issue(p));
+
+		} catch (ParseException e1) {
 		}
 	}
 
@@ -183,7 +216,13 @@ public class InteractiveClient {
 		if (strId.equals(""))
 			dal.findAllEmployees().forEach(System.out::println);
 		else {
-			Long id = Long.parseLong(strId);
+			Long id;
+			try {
+				id = Long.parseLong(strId);
+			} catch (NumberFormatException e) {
+				System.err.println("invalid id" + strId);
+				return;
+			}
 			System.out.println(dal.findEmployeeById(id));
 		}
 
