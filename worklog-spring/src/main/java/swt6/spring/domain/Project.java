@@ -38,9 +38,8 @@ public class Project implements Serializable {
 	@JoinColumn(name = "projectLead")
 	private Employee projectLeader;
 
-	@OneToMany(mappedBy = "project", cascade = { CascadeType.MERGE,
-			CascadeType.REFRESH}, fetch = FetchType.EAGER, orphanRemoval = true)
-	private Set<Module> modules = new HashSet<>();
+	@OneToMany(mappedBy = "project", fetch = FetchType.EAGER)
+	private Set<LogbookEntry> entries = new HashSet<>();
 
 	public Long getId() {
 		return id;
@@ -104,6 +103,13 @@ public class Project implements Serializable {
 		return name;
 	}
 
+	public void addLogBookEntry(LogbookEntry lb) {
+		if (lb == null)
+			throw new IllegalArgumentException("logbookentry must not be null");
+		getEntries().add(lb);
+		lb.setProject(this);
+	}
+
 	public void addIssue(Issue issue) {
 		if (issue == null)
 			throw new IllegalArgumentException("issue must not be null");
@@ -120,25 +126,6 @@ public class Project implements Serializable {
 		// issue.setProject(null);
 	}
 
-	public void addModule(Module module) {
-		if (module == null)
-			throw new IllegalArgumentException("module must not be null");
-		modules.add(module);
-		module.setProject(this);
-	}
-
-	public void removeModule(Module module) {
-		if (module == null)
-			throw new IllegalArgumentException("module must not be null");
-		for (Module m : modules) {
-			if (m.getId().equals(module.getId()))
-				modules.remove(m);
-		}
-
-		module.setProject(null);
-
-	}
-
 	public Employee getProjectLeader() {
 		return projectLeader;
 	}
@@ -147,20 +134,20 @@ public class Project implements Serializable {
 		this.projectLeader = projectLeader;
 	}
 
-	public Set<Module> getModules() {
-		return modules;
-	}
-
-	public void setModules(Set<Module> modules) {
-		this.modules = modules;
-	}
-
 	public Set<Issue> getIssues() {
 		return issues;
 	}
 
 	public void setIssues(Set<Issue> issues) {
 		this.issues = issues;
+	}
+
+	public Set<LogbookEntry> getEntries() {
+		return entries;
+	}
+
+	public void setEntries(Set<LogbookEntry> entries) {
+		this.entries = entries;
 	}
 
 }

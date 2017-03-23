@@ -34,7 +34,7 @@ public class LogbookEntry implements Serializable {
 	private Phase phase;
 
 	@ManyToOne(optional = true)
-	private Module module;
+	private Project project;
 
 	@ManyToOne
 	private Issue issue;
@@ -94,12 +94,12 @@ public class LogbookEntry implements Serializable {
 		return getPhase() + ": " + getStartTime() + " - " + getEndTime() + " (" + getEmployee() + ")";
 	}
 
-	public Module getModule() {
-		return module;
+	public Project getProject() {
+		return project;
 	}
 
-	public void setModule(Module module) {
-		this.module = module;
+	public void setProject(Project project) {
+		this.project = project;
 	}
 
 	public Issue getIssue() {
@@ -111,5 +111,10 @@ public class LogbookEntry implements Serializable {
 	}
 
 	private static final long serialVersionUID = 8497603996267190243L;
+
+	public void removeIssue() {
+		getIssue().getLogbookEntries().remove(this);
+		setIssue(null);
+	}
 
 }

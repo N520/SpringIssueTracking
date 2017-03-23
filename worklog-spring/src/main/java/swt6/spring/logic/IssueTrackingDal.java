@@ -3,6 +3,9 @@ package swt6.spring.logic;
 import java.util.Date;
 import java.util.List;
 
+import javax.inject.Named;
+import javax.persistence.EntityManagerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,15 +13,14 @@ import org.springframework.transaction.annotation.Transactional;
 import swt6.spring.dao.EmployeeRepository;
 import swt6.spring.dao.IssueRepository;
 import swt6.spring.dao.LogbookEntryRepository;
-import swt6.spring.dao.ModuleRepository;
 import swt6.spring.dao.ProjectRepository;
 import swt6.spring.domain.Employee;
 import swt6.spring.domain.Issue;
 import swt6.spring.domain.IssueType;
 import swt6.spring.domain.LogbookEntry;
-import swt6.spring.domain.Module;
 import swt6.spring.domain.Phase;
 import swt6.spring.domain.Project;
+import swt6.util.JpaUtil;
 
 @Component("issueDal")
 @Transactional
@@ -29,12 +31,14 @@ public class IssueTrackingDal {
 
 	@Autowired
 	private LogbookEntryRepository lbRepo;
-	@Autowired
-	private ModuleRepository moduleRepo;
+
 	@Autowired
 	private ProjectRepository projectRepo;
 	@Autowired
 	private IssueRepository issueRepo;
+
+	@Autowired
+	private EntityManagerFactory emFactory;
 
 	// Employee methods
 	// -------------------------------------------------------------------------------------------------------------
@@ -107,13 +111,10 @@ public class IssueTrackingDal {
 
 		findAllLogbookEntriesForProject(project).forEach(this::deleteLogbookEntry);
 		findAllIssuesForPoject(project).forEach(this::deleteIssue);
-		findAllModulesForProject(project).forEach(this::deleteModule);
 
 		projectRepo.delete(project);
 
 	}
-
-	// TODO addModuleToProject
 
 	// END project methods
 	// -------------------------------------------------------------------------------------------------------------
@@ -135,7 +136,7 @@ public class IssueTrackingDal {
 
 		issue.getLogbookEntries().forEach(this::deleteLogbookEntry);
 
-		issue.moveToProject(null, null);
+		issue.moveToProject(null);
 		issue.detachEmployee();
 		issueRepo.delete(issue);
 	}
@@ -154,7 +155,16 @@ public class IssueTrackingDal {
 	// project ( use addLogbookEntryToProject(Projcet p, module m))
 	// if adding lb to issue and issue has project also add lb to project/module
 	@Transactional
-	public void addLogbookEntryToProject(LogbookEntry lb, Module module) {
+	public void addLogbookEntryToProject(LogbookEntry lb, Project project) {
+		Issue issue = lb.getIssue();
+		if (issue != null) {
+			lb.removeIssue();
+			syncIssue(issue);
+		}
+
+		project.addLogBookEntry(lb);
+
+		syncLogbookEntry(lb);
 
 	}
 
@@ -163,8 +173,11 @@ public class IssueTrackingDal {
 		if (issue.getProject() == null)
 			throw new IllegalStateException("cannot add logbookentry to unassigned issue");
 		issue.addLogbookEntry(lb);
-		issue = syncIssue(issue);
-		lb = syncLogbookEntry(lb);
+
+		issue.getProject().addLogBookEntry(lb);
+
+		syncIssue(issue);
+		syncLogbookEntry(lb);
 	}
 	// TODO moveIssueToProject
 	// handeled in Issue.moveToProject
@@ -206,34 +219,6 @@ public class IssueTrackingDal {
 	// END Issue methods
 	// -------------------------------------------------------------------------------------------------------------
 
-	// Module methods
-	// -------------------------------------------------------------------------------------------------------------
-
-	@Transactional
-	public Module syncModule(Module module) {
-		return moduleRepo.save(module);
-	}
-
-	@Transactional(readOnly = true)
-	public List<Module> findAllModules() {
-		return moduleRepo.findAll();
-	}
-
-	@Transactional
-	public void deleteModule(Module m) {
-		m.setProject(null);
-		m = syncModule(m);
-		moduleRepo.delete(m);
-	}
-
-	@Transactional(readOnly = true)
-	public List<Module> findAllModulesForProject(Project project) {
-		return moduleRepo.findForProject(project);
-	}
-
-	// END module methods
-	// -------------------------------------------------------------------------------------------------------------
-
 	// Logbook methods
 	// -------------------------------------------------------------------------------------------------------------
 	@Transactional
@@ -261,25 +246,14 @@ public class IssueTrackingDal {
 
 	@Transactional
 	public LogbookEntry assignEmployeeToLogbookEntry(Employee employee, LogbookEntry lb) {
-		if (lb.getModule() == null)
-			throw new IllegalStateException("cannot create LogbookEntry like this, use createLogbookEntry instead");
 		lb.setEmployee(employee);
 		return syncLogbookEntry(lb);
 	}
 
 	@Transactional
-	public LogbookEntry assignLogbookEntryToModule(LogbookEntry lb, Module m) {
-		if (lb.getEmployee() == null)
-			throw new IllegalStateException("cannot create LogbookEntry like this, use createLogbookEntry instead");
-		lb.setModule(m);
-		return syncLogbookEntry(lb);
-	}
-
-	@Transactional
-	public LogbookEntry createLogbookEntry(Date startTime, Date endTime, Employee employee, Module module) {
+	public LogbookEntry createLogbookEntry(Date startTime, Date endTime, Employee employee) {
 		LogbookEntry lb = new LogbookEntry(startTime, endTime);
 		lb.setEmployee(employee);
-		lb.setModule(module);
 		return syncLogbookEntry(lb);
 	}
 

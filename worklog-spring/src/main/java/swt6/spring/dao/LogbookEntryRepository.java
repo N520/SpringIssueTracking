@@ -16,6 +16,6 @@ public interface LogbookEntryRepository extends JpaRepository<LogbookEntry, Long
 	@Query("from LogbookEntry lb where lb.employee = :employee")
 	List<LogbookEntry> findForEmployee(@Param("employee") Employee employee);
 	
-	@Query("from LogbookEntry lb where lb.module.project = :project")
+	@Query("from LogbookEntry lb where lb.project = :project")
 	List<LogbookEntry> findForProject(@Param("project") Project project);
 }
