@@ -19,6 +19,7 @@ import swt6.spring.domain.LogbookEntry;
 import swt6.spring.domain.PermanentEmployee;
 import swt6.spring.domain.Phase;
 import swt6.spring.domain.PhaseDescriptor;
+import swt6.spring.domain.PriorityType;
 import swt6.spring.domain.Project;
 import swt6.spring.domain.TemporaryEmployee;
 import swt6.spring.logic.IssueTrackingDal;
@@ -51,7 +52,7 @@ public class InteractiveClient {
 			System.out.println(availCmds);
 			String userCmd = promptFor(in, "");
 			while (!userCmd.equals("quit")) {
-				switch (userCmd) {
+				switch (userCmd.toLowerCase().trim()) {
 				case "insert p employee":
 					try {
 						facade.saveEmployee(new PermanentEmployee(promptFor(in, "firstName"), promptFor(in, "lastName"),
@@ -94,6 +95,13 @@ public class InteractiveClient {
 					userCmd = promptFor(in, "");
 					break;
 
+				case "list project employee":
+					strId = promptFor(in, "id");
+					facade.listEmployeesOfProject(Long.parseLong(strId));
+
+					userCmd = promptFor(in, "");
+					break;
+
 				case "add employee project":
 					Long employeeId = Long.parseLong(promptFor(in, "employeeId"));
 					Long projectId = Long.parseLong(promptFor(in, "projectId"));
@@ -123,11 +131,49 @@ public class InteractiveClient {
 					break;
 
 				case "insert issue":
+					strId = promptFor(in, "projectId for Issueassignment");
+					p = facade.findProjectForId(Long.parseLong(strId));
+					Issue issue = new Issue(p);
 
+					strId = promptFor(in, "Priortiy (LOW, NORMAL, HIGH)");
+
+					issue.setPriority(strId.equals("") ? PriorityType.NORMAL : PriorityType.valueOf(strId));
+
+					strId = promptFor(in, "issueState (NEW, OPEN, RESOLVED, CLOSED, REJECTED)");
+
+					issue.setState(strId.equals("") ? IssueType.NEW : IssueType.valueOf(strId));
+
+					strId = promptFor(in, "employeeId for Issue (optional)");
+					if (!strId.equals(""))
+						facade.assignEmployeToIssue(facade.findEmployeeForId(Long.parseLong(strId)), issue);
+					else
+						facade.saveIssue(issue);
 					userCmd = promptFor(in, "");
 					break;
 
 				case "update issue":
+					strId = promptFor(in, "issueId");
+					issue = facade.findIssueForId(Long.parseLong(strId));
+
+					strId = promptFor(in, "Priortiy (LOW, NORMAL, HIGH)");
+					issue.setPriority(strId.equals("") ? PriorityType.NORMAL : PriorityType.valueOf(strId));
+
+					strId = promptFor(in, "issueState (NEW, OPEN, RESOLVED, CLOSED, REJECTED)");
+					issue.setState(strId.equals("") ? IssueType.NEW : IssueType.valueOf(strId));
+
+					facade.saveIssue(issue);
+					
+					userCmd = promptFor(in, "");
+					break;
+
+				case "assign issue":
+					strId = promptFor(in, "issueId");
+					issue = facade.findIssueForId(Long.parseLong(strId));
+
+					strId = promptFor(in, "employeeId for Issueassignemt");
+					Employee e = facade.findEmployeeForId(Long.parseLong(strId));
+
+					facade.assignEmployeToIssue(e, issue);
 
 					userCmd = promptFor(in, "");
 					break;
@@ -142,9 +188,9 @@ public class InteractiveClient {
 						entry.setPhase(new Phase(PhaseDescriptor.valueOf(
 								promptFor(in, "assign Phase (ANALYSIS, IMPLEMENTATION, TEST, MAINTENANCE, OTHER"))));
 						strId = promptFor(in, "issueId (blank for no assignemnt");
-						// Long id;
+
 						if (!strId.equals("")) {
-							Issue issue = facade.findIssueForId(Long.parseLong(strId));
+							issue = facade.findIssueForId(Long.parseLong(strId));
 							facade.assignIssueToLogbookEntry(issue, entry);
 						} else {
 							strId = promptFor(in, "projectId");
@@ -156,8 +202,7 @@ public class InteractiveClient {
 							facade.assignIssueToProject(entry, p);
 						}
 
-					} catch (ParseException e) {
-
+					} catch (ParseException e1) {
 					}
 
 					userCmd = promptFor(in, "");
@@ -172,7 +217,7 @@ public class InteractiveClient {
 					strId = promptFor(in, "issueId (blank for no assignemnt");
 					// Long id;
 					if (!strId.equals("")) {
-						Issue issue = facade.findIssueForId(Long.parseLong(strId));
+						issue = facade.findIssueForId(Long.parseLong(strId));
 						facade.assignIssueToLogbookEntry(issue, entry);
 					} else {
 						strId = promptFor(in, "projectId");
@@ -184,13 +229,12 @@ public class InteractiveClient {
 				case "list entry":
 					strId = promptFor(in, "id (no input lists all)");
 					facade.listEntries(strId);
-
 					userCmd = promptFor(in, "");
 					break;
-					
+
 				case "list issues project":
 					strId = promptFor(in, "projectId");
-					String issueState = promptFor(in, "issueState (leave blank forall)");
+					String issueState = promptFor(in, "issueState (leave blank for all)");
 					IssueType type = null;
 					if (!issueState.equals(""))
 						type = IssueType.valueOf(issueState);
@@ -199,8 +243,21 @@ public class InteractiveClient {
 					userCmd = promptFor(in, "");
 					break;
 
+				case "list issue project by employee":
+					strId = promptFor(in, "id");
+					type = null;
+					issueState = promptFor(in, "issuetype (blank for all)");
+
+					if (!issueState.equals(""))
+						type = IssueType.valueOf(issueState);
+
+					facade.listIssuesOfProjectByEmployee(Long.parseLong(strId), type);
+					userCmd = promptFor(in, "");
+					break;
+
 				case "list worktime project":
 					userCmd = promptFor(in, "");
+					// TODO 
 					break;
 
 				case "help":

@@ -141,10 +141,15 @@ public class IssueTrackingDal {
 		issue.detachEmployee();
 		issueRepo.delete(issue);
 	}
-	
-	@Transactional(readOnly=true)
+
+	@Transactional(readOnly = true)
 	public List<Issue> findIssuesForProjectAndEmployee(Project project, Employee employee) {
 		return issueRepo.findForProjectAndEmployee(project, employee);
+	}
+
+	@Transactional(readOnly = true)
+	public List<Issue> findIssuesForProjectAndEmployee(Project project, Employee employee, IssueType state) {
+		return issueRepo.findForProjectAndEmployee(project, employee, state);
 	}
 
 	@Transactional(readOnly = true)

@@ -1,5 +1,7 @@
 package swt6.spring.client;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -133,8 +135,56 @@ public class WorkLogFacadeImpl implements WorkLogFacade {
 
 	@Override
 	public void listEntries(String strId) {
-		// TODO Auto-generated method stub
-		
+		if (strId.equals(""))
+			dal.findAllLogbookEntries().forEach(System.out::println);
+		else {
+			Long id;
+			try {
+				id = Long.parseLong(strId);
+			} catch (NumberFormatException e) {
+				System.err.println("not a number" + strId);
+				return;
+			}
+			System.out.println(dal.findLogbookEntryById(id));
+		}
+	}
+
+	@Override
+	public void listEmployeesOfProject(Long id) {
+		Project project = dal.findProjectById(id);
+		if (project == null) {
+			System.err.println("no project found with id " + id);
+			return;
+		}
+
+		System.out.println("lead: " + project.getProjectLeader());
+		System.out.println("members:");
+		project.getMembers().forEach(System.out::println);
+		System.out.println("-----------------------------------------------");
+
+	}
+
+	@Override
+	public void listIssuesOfProjectByEmployee(long id, IssueType state) {
+		Project project = dal.findProjectById(id);
+		if (project == null) {
+			System.err.println("no project found with id " + id);
+			return;
+		}
+		System.out.println("lead: " + project.getProjectLeader());
+		for (Employee e : project.getMembers()) {
+			List<Issue> issues = dal.findIssuesForProjectAndEmployee(project, e, state);
+			System.out.println(e + ": ");
+			for (Issue i : issues) {
+				System.out.println("   " + i);
+			}
+		}
+
+	}
+
+	@Override
+	public void assignEmployeToIssue(Employee employee, Issue issue) {
+		dal.assignIssueToEmployee(issue, employee);
 	}
 
 }

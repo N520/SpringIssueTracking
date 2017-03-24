@@ -9,6 +9,7 @@ import javax.persistence.Query;
 import org.hibernate.Session;
 import org.springframework.transaction.annotation.Transactional;
 
+import swt6.spring.domain.Employee;
 import swt6.spring.domain.Issue;
 import swt6.spring.domain.IssueType;
 import swt6.spring.domain.Project;
@@ -27,6 +28,15 @@ public class IssueRepositoryImpl implements IssueRepositoryCustom {
 		query.setParameter("project", project);
 
 		return query.getResultList();
+	}
+
+	@Override
+	public List<Issue> findForProjectAndEmployee(Project project, Employee employee, IssueType state) {
+
+		em.unwrap(Session.class).enableFilter("ISSUE_STATE_FILTER").setParameter("state", state.toString());
+
+		return em.createQuery("from Issue i where i.project =:project and i.employee = :employee")
+				.setParameter("project", project).setParameter("employee", employee).getResultList();
 	}
 
 }

@@ -36,4 +36,10 @@ public interface WorkLogFacade {
 	LogbookEntry findLogbookEntryForId(Long id);
 
 	void listEntries(String strId);
+
+	void listEmployeesOfProject(Long id);
+
+	void listIssuesOfProjectByEmployee(long id, IssueType state);
+
+	void assignEmployeToIssue(Employee findEmployeeForId, Issue issue);
 }

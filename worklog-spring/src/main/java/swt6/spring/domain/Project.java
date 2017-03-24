@@ -83,7 +83,7 @@ public class Project implements Serializable {
 	public void addMember(Employee empl) {
 		if (empl == null)
 			throw new IllegalArgumentException("employee must not be null");
-	
+
 		empl.getProjects().add(this);
 		this.members.add(empl);
 	}
@@ -92,15 +92,9 @@ public class Project implements Serializable {
 		if (empl == null)
 			throw new IllegalArgumentException("employee must not be null");
 
-		for (Project p : empl.getProjects()) {
-			if (p.getId().equals(getId()))
-				empl.getProjects().remove(p);
-		}
+		empl.getProjects().remove(this);
+		members.remove(empl);
 
-		for (Employee e : members) {
-			if (e.getId().equals(empl.getId()))
-				this.members.remove(e);
-		}
 	}
 
 	public String toString() {
