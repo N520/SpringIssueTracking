@@ -26,7 +26,6 @@ public class JpaInterceptor {
 
 	@Around("execution( public * swt6.spring.client.WorkLogFacadeImpl.*(..))")
 	public Object holdEntityManger(ProceedingJoinPoint pjp) throws Throwable {
-		System.err.println("ENTERING " + pjp.getTarget().getClass().getName() + "." + pjp.getSignature().getName());
 		if (entityManagerFactory == null)
 			throw new IllegalArgumentException("Property 'entityManagerFactory' is required");
 
@@ -35,18 +34,15 @@ public class JpaInterceptor {
 			participate = true;
 		else {
 			logger.trace("Opening EntityManager");
-			System.err.println("manager is open");
 			JpaUtil.openEntityManager(entityManagerFactory);
 		}
 
 		try {
-			System.err.println("proceeding");
 			return pjp.proceed(); // delegates to method of target class.
 		} finally {
 			if (!participate) {
 				JpaUtil.closeEntityManager(entityManagerFactory);
 				logger.trace("Closed EntityManager");
-				System.err.println("manager is closed");
 			}
 		}
 	}

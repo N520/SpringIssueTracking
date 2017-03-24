@@ -243,7 +243,7 @@ public class InteractiveClient {
 					userCmd = promptFor(in, "");
 					break;
 
-				case "list issues project":
+				case "list project issue":
 					strId = promptFor(in, "projectId");
 					String issueState = promptFor(in, "issueState (leave blank for all)");
 					IssueType type = null;
@@ -308,8 +308,8 @@ public class InteractiveClient {
 
 			Project p = dal.saveProject(new Project("Project Orange", empl1));
 			Issue i = dal.saveIssue(new Issue(p));
-			LogbookEntry lb = new LogbookEntry(DateUtil.getTime(2017, 03, 24, 18, 0),
-					DateUtil.getTime(2017, 03, 24, 8, 0));
+			LogbookEntry lb = new LogbookEntry(DateUtil.getTime(2017, 03, 24, 8, 0),
+					DateUtil.getTime(2017, 03, 24, 18, 0));
 			lb.setEmployee(empl1);
 			lb.setPhase(new Phase(PhaseDescriptor.IMPLEMENTATION));
 			dal.saveLogbookEntry(lb);

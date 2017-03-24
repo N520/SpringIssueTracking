@@ -199,15 +199,9 @@ public class WorkLogFacadeImpl implements WorkLogFacade {
 
 		System.out.println("starting calculation");
 
-		
-//		project.getMembers().forEach(System.out::println);
-		
-		// avoid exception
-//		List<Employee> l = dal.findEmployeesForProject(project);
-//		
 		for (Employee e : project.getMembers()) {
-			System.out.println(e);
 			List<Issue> issues = dal.findIssuesForProjectAndEmployee(project, e);
+			System.out.println(e + " worked on ");
 			for (Issue i : issues) {
 				sumEffort += i.getEffort();
 				sumEstimatedTime = i.getEstimatedTime();
@@ -218,15 +212,16 @@ public class WorkLogFacadeImpl implements WorkLogFacade {
 				}
 				sumLoggedHours += loggedHours;
 
-				System.out.println(e + " worked on " + i);
-				System.out.println("  effort: " + i.getEffort() + " estimatedTime" + i.getEstimatedTime()
+				System.out.println("  " + i);
+				System.out.println("    effort: " + i.getEffort() + " estimatedTime " + i.getEstimatedTime()
 						+ " vs. actual Logged Time " + loggedHours);
 			}
-
-			System.out.println("overall time spent on project: " + sumEffort);
-			System.out.println("overall time estimated on project: " + sumEstimatedTime);
-			System.out.println("overall time loged on : " + sumLoggedHours);
+			System.out.println("--------------------------------");
 		}
+
+		System.out.println("overall time spent on project: " + sumEffort);
+		System.out.println("overall time estimated on project: " + sumEstimatedTime);
+		System.out.println("overall time loged on : " + sumLoggedHours);
 		System.out.println("done with calculation");
 		return 0;
 	}
