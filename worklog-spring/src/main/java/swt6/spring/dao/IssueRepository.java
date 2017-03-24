@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import swt6.spring.domain.Employee;
 import swt6.spring.domain.Issue;
 import swt6.spring.domain.Project;
 
@@ -16,4 +17,6 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
 	@Query("from Issue i where i.project = :project")
 	List<Issue> findForProject(@Param("project") Project project);
 
+	@Query("from Issue i where i.project =:project and i.employee = :employee")
+	List<Issue> findForProjectAndEmployee(@Param("project") Project project, @Param("employee") Employee employee);
 }

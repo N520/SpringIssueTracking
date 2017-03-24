@@ -71,7 +71,11 @@ public class DummyClient {
 			System.out.println(l.size());
 			System.out.println("PRINTING ISSUE ---------------------------------");
 
-			issue.getProject().getEntries().forEach(System.out::println);
+			dal.assignIssueToEmployee(issue, empl1);
+			
+			issue = dal.syncIssue(new Issue(project));
+			
+			dal.findIssuesForProjectAndEmployee(project, empl1).forEach(System.out::println);
 
 		}
 
