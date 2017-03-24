@@ -2,6 +2,7 @@ package swt6.spring.client;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.security.KeyStore.Entry;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -13,7 +14,11 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import swt6.spring.domain.Address;
 import swt6.spring.domain.Employee;
 import swt6.spring.domain.Issue;
+import swt6.spring.domain.IssueType;
+import swt6.spring.domain.LogbookEntry;
 import swt6.spring.domain.PermanentEmployee;
+import swt6.spring.domain.Phase;
+import swt6.spring.domain.PhaseDescriptor;
 import swt6.spring.domain.Project;
 import swt6.spring.domain.TemporaryEmployee;
 import swt6.spring.logic.IssueTrackingDal;
@@ -39,8 +44,8 @@ public class InteractiveClient {
 				+ "update entry, list issues project, list worktime project, help, quit";
 
 		try (AbstractApplicationContext appCtx = new ClassPathXmlApplicationContext(configFile)) {
-			WorkLogFacade dal = appCtx.getBean("workLog", WorkLogFacade.class);
-			init(dfmt, dal);
+			WorkLogFacade facade = appCtx.getBean("workLog", WorkLogFacade.class);
+			init(dfmt, facade);
 
 			System.out.println("Hibernate Employee Admin");
 			System.out.println(availCmds);
@@ -49,7 +54,7 @@ public class InteractiveClient {
 				switch (userCmd) {
 				case "insert p employee":
 					try {
-						dal.saveEmployee(new PermanentEmployee(promptFor(in, "firstName"), promptFor(in, "lastName"),
+						facade.saveEmployee(new PermanentEmployee(promptFor(in, "firstName"), promptFor(in, "lastName"),
 								dfmt.parse(promptFor(in, "dob (dd.mm.yyyy)")),
 								new Address(promptFor(in, "zipCode"), promptFor(in, "city"), promptFor(in, "street")),
 								Integer.parseInt(promptFor(in, "salary"))));
@@ -62,7 +67,7 @@ public class InteractiveClient {
 
 				case "insert t employee":
 					try {
-						dal.saveEmployee(new TemporaryEmployee(promptFor(in, "firstName"), promptFor(in, "lastName"),
+						facade.saveEmployee(new TemporaryEmployee(promptFor(in, "firstName"), promptFor(in, "lastName"),
 								dfmt.parse(promptFor(in, "dob (dd.mm.yyyy)")),
 								new Address(promptFor(in, "zipCode"), promptFor(in, "city"), promptFor(in, "street")),
 								promptFor(in, "renter"), Integer.parseInt(promptFor(in, "rate")),
@@ -77,14 +82,14 @@ public class InteractiveClient {
 				case "list employee":
 					String strId = promptFor(in, "id (no input lists all)");
 
-					dal.listEmployees(strId);
+					facade.listEmployees(strId);
 
 					userCmd = promptFor(in, "");
 					break;
 
 				case "list project":
 					strId = promptFor(in, "id (no input lists all)");
-					dal.listProjects(strId);
+					facade.listProjects(strId);
 
 					userCmd = promptFor(in, "");
 					break;
@@ -93,16 +98,26 @@ public class InteractiveClient {
 					Long employeeId = Long.parseLong(promptFor(in, "employeeId"));
 					Long projectId = Long.parseLong(promptFor(in, "projectId"));
 
-					dal.addEmployeeToProject(employeeId, projectId);
+					facade.addEmployeeToProject(employeeId, projectId);
 
 					userCmd = promptFor(in, "");
 					break;
 
 				case "remove employee project":
+					employeeId = Long.parseLong(promptFor(in, "employeeId"));
+					projectId = Long.parseLong(promptFor(in, "projectId"));
+
+					facade.removeEmployeeFromProject(employeeId, projectId);
+
 					userCmd = promptFor(in, "");
 					break;
 
 				case "insert project":
+					Project p = new Project(promptFor(in, "Project name"));
+					Employee lead = facade
+							.findEmployeeForId(Long.parseLong(promptFor(in, "Employee Id for projectlead")));
+					p.setProjectLeader(lead);
+					facade.saveProject(p);
 
 					userCmd = promptFor(in, "");
 					break;
@@ -118,16 +133,68 @@ public class InteractiveClient {
 					break;
 
 				case "insert entry":
+
+					try {
+						LogbookEntry entry = new LogbookEntry(dfmt.parse(promptFor(in, "start Date")),
+								dfmt.parse(promptFor(in, "end date")));
+						entry.setEmployee(
+								facade.findEmployeeForId(Long.parseLong(promptFor(in, "assign employee (id)"))));
+						entry.setPhase(new Phase(PhaseDescriptor.valueOf(
+								promptFor(in, "assign Phase (ANALYSIS, IMPLEMENTATION, TEST, MAINTENANCE, OTHER"))));
+						strId = promptFor(in, "issueId (blank for no assignemnt");
+						// Long id;
+						if (!strId.equals("")) {
+							Issue issue = facade.findIssueForId(Long.parseLong(strId));
+							facade.assignIssueToLogbookEntry(issue, entry);
+						} else {
+							strId = promptFor(in, "projectId");
+							p = facade.findProjectForId(Long.parseLong(strId));
+							while (p == null) {
+								strId = promptFor(in, "invalid project id!\nTry again");
+								p = facade.findProjectForId(Long.parseLong(strId));
+							}
+							facade.assignIssueToProject(entry, p);
+						}
+
+					} catch (ParseException e) {
+
+					}
+
 					userCmd = promptFor(in, "");
 					break;
 
 				case "update entry":
+					Long id = Long.parseLong(promptFor(in, "id"));
+					LogbookEntry entry = facade.findLogbookEntryForId(id);
 
+					entry.setEmployee(facade.findEmployeeForId(Long.parseLong(promptFor(in, "new employeeid"))));
+					entry.setPhase(new Phase(PhaseDescriptor.valueOf(promptFor(in, "new Phase"))));
+					strId = promptFor(in, "issueId (blank for no assignemnt");
+					// Long id;
+					if (!strId.equals("")) {
+						Issue issue = facade.findIssueForId(Long.parseLong(strId));
+						facade.assignIssueToLogbookEntry(issue, entry);
+					} else {
+						strId = promptFor(in, "projectId");
+						facade.assignIssueToProject(entry, facade.findProjectForId(Long.parseLong(strId)));
+					}
 					userCmd = promptFor(in, "");
 					break;
 
+				case "list entry":
+					strId = promptFor(in, "id (no input lists all)");
+					facade.listEntries(strId);
+
+					userCmd = promptFor(in, "");
+					break;
+					
 				case "list issues project":
-					dal.listIssuesForProject(Long.parseLong(promptFor(in, "project id")));
+					strId = promptFor(in, "projectId");
+					String issueState = promptFor(in, "issueState (leave blank forall)");
+					IssueType type = null;
+					if (!issueState.equals(""))
+						type = IssueType.valueOf(issueState);
+					facade.listIssuesForProject(Long.parseLong(strId), type);
 
 					userCmd = promptFor(in, "");
 					break;

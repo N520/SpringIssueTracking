@@ -50,22 +50,22 @@ public class IssueTrackingDalIssueTest {
 
 	@After
 	public void tearDown() {
-//		 dal.deleteProject(project);
+		// dal.deleteProject(project);
 		dal.deleteIssue(issue);
 		dal.findAllLogbookEntries().forEach(dal::deleteLogbookEntry);
 
-//		 dal.deleteEmployee(empl1);
+		// dal.deleteEmployee(empl1);
 	}
 
 	@Test
 	public void testFindAllIssuesForProject() {
 		issue = dal.syncIssue(issue);
 		project = dal.syncProject(new Project("awesoem", empl1));
-		assertEquals(dal.findAllIssuesForPoject(project).size(), 0);
+		assertEquals(dal.findAllIssuesForPoject(project, null).size(), 0);
 
 		dal.assignIssueToProject(issue, project);
 
-		assertEquals(dal.findAllIssuesForPoject(project).size(), 1);
+		assertEquals(dal.findAllIssuesForPoject(project, null).size(), 1);
 	}
 
 	@Test

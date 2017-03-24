@@ -12,10 +12,8 @@ import swt6.spring.domain.Issue;
 import swt6.spring.domain.Project;
 
 @Repository("issueRepo")
-public interface IssueRepository extends JpaRepository<Issue, Long> {
+public interface IssueRepository extends JpaRepository<Issue, Long>, IssueRepositoryCustom {
 
-	@Query("from Issue i where i.project = :project")
-	List<Issue> findForProject(@Param("project") Project project);
 
 	@Query("from Issue i where i.project =:project and i.employee = :employee")
 	List<Issue> findForProjectAndEmployee(@Param("project") Project project, @Param("employee") Employee employee);

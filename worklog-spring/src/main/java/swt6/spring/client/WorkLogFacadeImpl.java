@@ -5,6 +5,8 @@ import org.springframework.stereotype.Component;
 
 import swt6.spring.domain.Employee;
 import swt6.spring.domain.Issue;
+import swt6.spring.domain.IssueType;
+import swt6.spring.domain.LogbookEntry;
 import swt6.spring.domain.Project;
 import swt6.spring.logic.IssueTrackingDal;
 
@@ -49,8 +51,8 @@ public class WorkLogFacadeImpl implements WorkLogFacade {
 	}
 
 	@Override
-	public void listIssuesForProject(Long id) {
-		dal.findAllIssuesForPoject(dal.findProjectById(id)).forEach(System.out::println);
+	public void listIssuesForProject(Long id, IssueType state) {
+		dal.findAllIssuesForPoject(dal.findProjectById(id), state).forEach(System.out::println);
 
 	}
 
@@ -84,6 +86,55 @@ public class WorkLogFacadeImpl implements WorkLogFacade {
 	@Override
 	public Issue saveIssue(Issue issue) {
 		return dal.syncIssue(issue);
+	}
+
+	@Override
+	public void removeEmployeeFromProject(Long employeeId, Long projectId) {
+		Project p = dal.findProjectById(projectId);
+		Employee e = dal.findEmployeeById(employeeId);
+
+		dal.unassignEmployeeFromProject(e, p);
+		System.out.println("employees working on " + p + ":");
+		p.getMembers().forEach(System.out::println);
+	}
+
+	@Override
+	public Employee findEmployeeForId(long parseLong) {
+		return dal.findEmployeeById(parseLong);
+	}
+
+	@Override
+	public Issue findIssueForId(long id) {
+		return dal.findIssueById(id);
+	}
+
+	@Override
+	public Project findProjectForId(long id) {
+
+		return dal.findProjectById(id);
+	}
+
+	@Override
+	public void assignIssueToLogbookEntry(Issue issue, LogbookEntry entry) {
+		dal.addLogbookEntryToIssue(entry, issue);
+
+	}
+
+	@Override
+	public void assignIssueToProject(LogbookEntry entry, Project project) {
+		dal.addLogbookEntryToProject(entry, project);
+
+	}
+
+	@Override
+	public LogbookEntry findLogbookEntryForId(Long id) {
+		return dal.findLogbookEntryById(id);
+	}
+
+	@Override
+	public void listEntries(String strId) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

@@ -11,6 +11,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import swt6.spring.domain.Address;
 import swt6.spring.domain.Employee;
 import swt6.spring.domain.Issue;
+import swt6.spring.domain.IssueType;
 import swt6.spring.domain.LogbookEntry;
 import swt6.spring.domain.PermanentEmployee;
 import swt6.spring.domain.Project;
@@ -76,6 +77,8 @@ public class DummyClient {
 			issue = dal.syncIssue(new Issue(project));
 			
 			dal.findIssuesForProjectAndEmployee(project, empl1).forEach(System.out::println);
+			
+			dal.findAllIssuesForPoject(project, IssueType.CLOSED).forEach(System.out::println);
 
 		}
 

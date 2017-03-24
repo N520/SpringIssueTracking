@@ -111,7 +111,7 @@ public class IssueTrackingDal {
 	public void deleteProject(Project project) {
 
 		findAllLogbookEntriesForProject(project).forEach(this::deleteLogbookEntry);
-		findAllIssuesForPoject(project).forEach(this::deleteIssue);
+		findAllIssuesForPoject(project, null).forEach(this::deleteIssue);
 
 		projectRepo.delete(project);
 
@@ -123,8 +123,8 @@ public class IssueTrackingDal {
 	// Issue methods
 	// -------------------------------------------------------------------------------------------------------------
 	@Transactional(readOnly = true)
-	public List<Issue> findAllIssuesForPoject(Project project) {
-		return issueRepo.findForProject(project);
+	public List<Issue> findAllIssuesForPoject(Project project, IssueType state) {
+		return issueRepo.findForProject(project, state);
 	}
 
 	@Transactional
