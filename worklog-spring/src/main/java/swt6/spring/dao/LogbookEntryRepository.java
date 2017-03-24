@@ -13,13 +13,11 @@ import swt6.spring.domain.LogbookEntry;
 import swt6.spring.domain.Project;
 
 @Repository("lbRepo")
-public interface LogbookEntryRepository extends JpaRepository<LogbookEntry, Long> {
+public interface LogbookEntryRepository extends JpaRepository<LogbookEntry, Long>, LogbookEntryRepositoryCustom {
 	@Query("from LogbookEntry lb where lb.employee = :employee")
 	List<LogbookEntry> findForEmployee(@Param("employee") Employee employee);
 
 	@Query("from LogbookEntry lb where lb.project = :project")
 	List<LogbookEntry> findForProject(@Param("project") Project project);
 
-	@Query("from LogbookEntry lb where lb.issue = :issue")
-	List<LogbookEntry> findForIssue(@Param("issue") Issue issue);
 }

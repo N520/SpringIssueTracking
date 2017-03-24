@@ -15,11 +15,6 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
-import org.hibernate.Hibernate;
-import org.hibernate.annotations.Cascade;
-
-import swt6.util.JpaUtil;
-
 @Entity
 public class Project implements Serializable {
 	private static final long serialVersionUID = 1L;

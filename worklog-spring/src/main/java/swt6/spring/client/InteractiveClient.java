@@ -138,11 +138,12 @@ public class InteractiveClient {
 
 					strId = promptFor(in, "Priortiy (LOW, NORMAL, HIGH)");
 
-					issue.setPriority(strId.equals("") ? PriorityType.NORMAL : PriorityType.valueOf(strId));
+					issue.setPriority(
+							strId.equals("") ? PriorityType.NORMAL : PriorityType.valueOf(strId.toUpperCase()));
 
 					strId = promptFor(in, "issueState (NEW, OPEN, RESOLVED, CLOSED, REJECTED)");
 
-					issue.setState(strId.equals("") ? IssueType.NEW : IssueType.valueOf(strId));
+					issue.setState(strId.equals("") ? IssueType.NEW : IssueType.valueOf(strId.toUpperCase()));
 
 					strId = promptFor(in, "employeeId for Issue (optional)");
 					if (!strId.equals(""))
@@ -157,10 +158,11 @@ public class InteractiveClient {
 					issue = facade.findIssueForId(Long.parseLong(strId));
 
 					strId = promptFor(in, "Priortiy (LOW, NORMAL, HIGH)");
-					issue.setPriority(strId.equals("") ? PriorityType.NORMAL : PriorityType.valueOf(strId));
+					issue.setPriority(
+							strId.equals("") ? PriorityType.NORMAL : PriorityType.valueOf(strId.toUpperCase()));
 
 					strId = promptFor(in, "issueState (NEW, OPEN, RESOLVED, CLOSED, REJECTED)");
-					issue.setState(strId.equals("") ? IssueType.NEW : IssueType.valueOf(strId));
+					issue.setState(strId.equals("") ? IssueType.NEW : IssueType.valueOf(strId.toUpperCase()));
 
 					strId = promptFor(in, "effort");
 					issue.setEffort(strId.equals("") ? issue.getEffort() : Integer.parseInt(strId));
@@ -197,7 +199,8 @@ public class InteractiveClient {
 						entry.setEmployee(
 								facade.findEmployeeForId(Long.parseLong(promptFor(in, "assign employee (id)"))));
 						entry.setPhase(new Phase(PhaseDescriptor.valueOf(
-								promptFor(in, "assign Phase (ANALYSIS, IMPLEMENTATION, TEST, MAINTENANCE, OTHER"))));
+								promptFor(in, "assign Phase (ANALYSIS, IMPLEMENTATION, TEST, MAINTENANCE, OTHER")
+										.toUpperCase())));
 						strId = promptFor(in, "issueId (blank for no assignemnt");
 
 						if (!strId.equals("")) {
@@ -224,7 +227,7 @@ public class InteractiveClient {
 					LogbookEntry entry = facade.findLogbookEntryForId(id);
 
 					entry.setEmployee(facade.findEmployeeForId(Long.parseLong(promptFor(in, "new employeeid"))));
-					entry.setPhase(new Phase(PhaseDescriptor.valueOf(promptFor(in, "new Phase"))));
+					entry.setPhase(new Phase(PhaseDescriptor.valueOf(promptFor(in, "new Phase").toUpperCase())));
 					strId = promptFor(in, "issueId (blank for no assignemnt");
 					// Long id;
 					if (!strId.equals("")) {
@@ -248,7 +251,7 @@ public class InteractiveClient {
 					String issueState = promptFor(in, "issueState (leave blank for all)");
 					IssueType type = null;
 					if (!issueState.equals(""))
-						type = IssueType.valueOf(issueState);
+						type = IssueType.valueOf(issueState.toUpperCase());
 					facade.listIssuesForProject(Long.parseLong(strId), type);
 
 					userCmd = promptFor(in, "");
@@ -260,7 +263,7 @@ public class InteractiveClient {
 					issueState = promptFor(in, "issuetype (blank for all)");
 
 					if (!issueState.equals(""))
-						type = IssueType.valueOf(issueState);
+						type = IssueType.valueOf(issueState.toUpperCase());
 
 					facade.listIssuesOfProjectByEmployee(Long.parseLong(strId), type);
 					userCmd = promptFor(in, "");
