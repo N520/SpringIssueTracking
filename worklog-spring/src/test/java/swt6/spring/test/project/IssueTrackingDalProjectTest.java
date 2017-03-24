@@ -61,9 +61,6 @@ public class IssueTrackingDalProjectTest {
 		project = dal.findProjectById(project.getId());
 		JpaUtil.executeInOpenEntityManager(emFactory, () -> assertEquals(1, project.getMembers().size()));
 		
-		dal.unassignEmployeeFromProject(empl1, project);
-		project = dal.findProjectById(project.getId());
-		assertEquals(0, project.getMembers().size());
 	}
 
 	@Test

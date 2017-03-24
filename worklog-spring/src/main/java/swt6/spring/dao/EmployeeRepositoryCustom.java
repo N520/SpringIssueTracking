@@ -1,10 +1,11 @@
 package swt6.spring.dao;
 
-import org.springframework.stereotype.Repository;
+import java.util.List;
 
 import swt6.spring.domain.Employee;
+import swt6.spring.domain.Project;
 
 
 public interface EmployeeRepositoryCustom {
-	Employee findById();
+	List<Employee> findForProject(Project project);
 }

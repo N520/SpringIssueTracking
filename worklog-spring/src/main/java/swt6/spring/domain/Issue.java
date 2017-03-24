@@ -9,6 +9,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
@@ -52,7 +53,7 @@ public class Issue implements Serializable {
 	private Project project;
 
 	@OneToMany(cascade = { CascadeType.MERGE, CascadeType.REFRESH,
-			CascadeType.REMOVE }, mappedBy = "issue", orphanRemoval = true)
+			CascadeType.REMOVE }, fetch = FetchType.EAGER, mappedBy = "issue", orphanRemoval = true)
 	private Set<LogbookEntry> logbookEntries = new HashSet<>();
 
 	public Issue() {
@@ -193,8 +194,8 @@ public class Issue implements Serializable {
 
 	@Override
 	public String toString() {
-		String employeeStr =  employee == null ? "nobody" : employee.toString();
-		return state + " issue assigned to " + employeeStr;
+		String employeeStr = employee == null ? "nobody" : employee.toString();
+		return getId() + ": " + state + " issue assigned to " + employeeStr;
 	}
 
 }

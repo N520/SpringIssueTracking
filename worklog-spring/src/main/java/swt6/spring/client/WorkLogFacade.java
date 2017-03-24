@@ -42,4 +42,10 @@ public interface WorkLogFacade {
 	void listIssuesOfProjectByEmployee(long id, IssueType state);
 
 	void assignEmployeToIssue(Employee findEmployeeForId, Issue issue);
+	
+	int showWorktimeForProjectPerEmployee(Project project);
+
+	void assignLogbookEntryToProject(LogbookEntry entry, Project p);
+
+	void saveLogbookEntry(LogbookEntry lb);
 }

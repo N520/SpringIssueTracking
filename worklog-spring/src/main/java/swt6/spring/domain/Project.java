@@ -31,7 +31,7 @@ public class Project implements Serializable {
 	@Column(nullable = false, length = 50)
 	private String name;
 
-	@ManyToMany(fetch = FetchType.LAZY)
+	@ManyToMany(fetch = FetchType.EAGER)
 	private Set<Employee> members = new HashSet<>();
 
 	@OneToMany(mappedBy = "project", fetch = FetchType.EAGER)

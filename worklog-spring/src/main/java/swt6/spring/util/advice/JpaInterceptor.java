@@ -26,7 +26,7 @@ public class JpaInterceptor {
 
 	@Around("execution( public * swt6.spring.client.WorkLogFacadeImpl.*(..))")
 	public Object holdEntityManger(ProceedingJoinPoint pjp) throws Throwable {
-		System.err.println("ENTERING -dasödlasödk");
+		System.err.println("ENTERING " + pjp.getTarget().getClass().getName() + "." + pjp.getSignature().getName());
 		if (entityManagerFactory == null)
 			throw new IllegalArgumentException("Property 'entityManagerFactory' is required");
 

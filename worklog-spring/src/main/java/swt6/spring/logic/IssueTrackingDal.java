@@ -1,5 +1,7 @@
 package swt6.spring.logic;
 
+import static org.hamcrest.CoreMatchers.containsString;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -84,7 +86,7 @@ public class IssueTrackingDal {
 
 		employee.getProjects().add(project);
 		Set<Employee> members = project.getMembers();
-		Hibernate.initialize(members);
+//		Hibernate.initialize(members);
 		members.add(employee);
 		emplRepo.save(employee);
 		projectRepo.save(project);
@@ -207,7 +209,6 @@ public class IssueTrackingDal {
 		issue.getProject().removeLogbookEntry(lb);
 
 		syncIssue(issue);
-		syncLogbookEntry(lb);
 	}
 
 	/**
@@ -321,8 +322,13 @@ public class IssueTrackingDal {
 
 	}
 
+	@Transactional(readOnly=true)
 	public LogbookEntry findLogbookEntryById(long id) {
 		return lbRepo.findOne(id);
+	}
+	@Transactional(readOnly=true)
+	public List<Employee> findEmployeesForProject(Project project) {
+		return emplRepo.findForProject(project);
 	}
 
 	// END Logbookentries methods

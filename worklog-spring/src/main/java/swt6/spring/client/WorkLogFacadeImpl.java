@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import swt6.spring.domain.Employee;
 import swt6.spring.domain.Issue;
@@ -13,6 +14,7 @@ import swt6.spring.domain.Project;
 import swt6.spring.logic.IssueTrackingDal;
 
 @Component("workLog")
+@Transactional
 public class WorkLogFacadeImpl implements WorkLogFacade {
 
 	@Autowired
@@ -117,6 +119,7 @@ public class WorkLogFacadeImpl implements WorkLogFacade {
 	}
 
 	@Override
+	@Transactional
 	public void assignIssueToLogbookEntry(Issue issue, LogbookEntry entry) {
 		dal.addLogbookEntryToIssue(entry, issue);
 
@@ -185,6 +188,59 @@ public class WorkLogFacadeImpl implements WorkLogFacade {
 	@Override
 	public void assignEmployeToIssue(Employee employee, Issue issue) {
 		dal.assignIssueToEmployee(issue, employee);
+	}
+
+	@Override
+	@Transactional
+	public int showWorktimeForProjectPerEmployee(Project project) {
+		int sumEffort = 0;
+		int sumEstimatedTime = 0;
+		int sumLoggedHours = 0;
+
+		System.out.println("starting calculation");
+
+		
+//		project.getMembers().forEach(System.out::println);
+		
+		// avoid exception
+//		List<Employee> l = dal.findEmployeesForProject(project);
+//		
+		for (Employee e : project.getMembers()) {
+			System.out.println(e);
+			List<Issue> issues = dal.findIssuesForProjectAndEmployee(project, e);
+			for (Issue i : issues) {
+				sumEffort += i.getEffort();
+				sumEstimatedTime = i.getEstimatedTime();
+				int loggedHours = 0;
+				for (LogbookEntry lb : i.getLogbookEntries()) {
+					long secs = (lb.getEndTime().getTime() - lb.getStartTime().getTime()) / 1000;
+					loggedHours += (int) (secs / 3600);
+				}
+				sumLoggedHours += loggedHours;
+
+				System.out.println(e + " worked on " + i);
+				System.out.println("  effort: " + i.getEffort() + " estimatedTime" + i.getEstimatedTime()
+						+ " vs. actual Logged Time " + loggedHours);
+			}
+
+			System.out.println("overall time spent on project: " + sumEffort);
+			System.out.println("overall time estimated on project: " + sumEstimatedTime);
+			System.out.println("overall time loged on : " + sumLoggedHours);
+		}
+		System.out.println("done with calculation");
+		return 0;
+	}
+
+	@Override
+	public void assignLogbookEntryToProject(LogbookEntry entry, Project p) {
+		dal.addLogbookEntryToProject(entry, p);
+
+	}
+
+	@Override
+	public void saveLogbookEntry(LogbookEntry lb) {
+		dal.syncLogbookEntry(lb);
+
 	}
 
 }

@@ -23,6 +23,7 @@ import swt6.spring.domain.PriorityType;
 import swt6.spring.domain.Project;
 import swt6.spring.domain.TemporaryEmployee;
 import swt6.spring.logic.IssueTrackingDal;
+import swt6.util.DateUtil;
 
 public class InteractiveClient {
 
@@ -38,7 +39,7 @@ public class InteractiveClient {
 	}
 
 	public static void main(String[] args) {
-		DateFormat dfmt = new SimpleDateFormat("dd.MM.yyyy");
+		DateFormat dfmt = new SimpleDateFormat("dd.MM.yyyy hh:mm");
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		String availCmds = "======= Issue Tracking =======\ncommands: insert p employee, insert t employee, list employee, insert project, list project, \n"
 				+ "add employee project, remove employee project, insert issue, update issue, insert entry, \n"
@@ -161,8 +162,14 @@ public class InteractiveClient {
 					strId = promptFor(in, "issueState (NEW, OPEN, RESOLVED, CLOSED, REJECTED)");
 					issue.setState(strId.equals("") ? IssueType.NEW : IssueType.valueOf(strId));
 
+					strId = promptFor(in, "effort");
+					issue.setEffort(strId.equals("") ? issue.getEffort() : Integer.parseInt(strId));
+
+					strId = promptFor(in, "estimatedTime");
+					issue.setEstimatedTime(strId.equals("") ? issue.getEstimatedTime() : Integer.parseInt(strId));
+
 					facade.saveIssue(issue);
-					
+
 					userCmd = promptFor(in, "");
 					break;
 
@@ -173,7 +180,11 @@ public class InteractiveClient {
 					strId = promptFor(in, "employeeId for Issueassignemt");
 					Employee e = facade.findEmployeeForId(Long.parseLong(strId));
 
-					facade.assignEmployeToIssue(e, issue);
+					try {
+						facade.assignEmployeToIssue(e, issue);
+					} catch (IllegalStateException ex) {
+						System.err.println(ex.getMessage());
+					}
 
 					userCmd = promptFor(in, "");
 					break;
@@ -199,7 +210,7 @@ public class InteractiveClient {
 								strId = promptFor(in, "invalid project id!\nTry again");
 								p = facade.findProjectForId(Long.parseLong(strId));
 							}
-							facade.assignIssueToProject(entry, p);
+							facade.assignLogbookEntryToProject(entry, p);
 						}
 
 					} catch (ParseException e1) {
@@ -256,8 +267,12 @@ public class InteractiveClient {
 					break;
 
 				case "list worktime project":
+					strId = promptFor(in, "id");
+					p = facade.findProjectForId(Long.parseLong(strId));
+
+					facade.showWorktimeForProjectPerEmployee(p);
+
 					userCmd = promptFor(in, "");
-					// TODO 
 					break;
 
 				case "help":
@@ -275,83 +290,39 @@ public class InteractiveClient {
 		}
 	}
 
-	// private static void listProjects(String strId) {
-	// if (strId.equals(""))
-	// dal.findAllProjects().forEach(System.out::println);
-	// else {
-	// Long id;
-	// try {
-	// id = Long.parseLong(strId);
-	// } catch (NumberFormatException e) {
-	// System.err.println("invalid id" + strId);
-	// return;
-	// }
-	// System.out.println(dal.findProjectById(id));
-	// }
-	// }
-	//
-	// private static void addEmployeeToProject(Long employeeId, Long projectId)
-	// {
-	// Employee e = dal.findEmployeeById(employeeId);
-	// Project p = dal.findProjectById(projectId);
-	// if (e == null) {
-	// System.err.println("no employee with id" + employeeId);
-	// return;
-	// }
-	// if (p == null) {
-	// System.err.println("no employee with id" + projectId);
-	// return;
-	// }
-	// dal.assignEmployeeToProject(e, p);
-	//
-	// System.out.println("employees working on " + p + ":");
-	// p.getMembers().forEach(System.out::println);
-	//
-	// }
-	//
 	private static void init(DateFormat dfmt, WorkLogFacade dal) {
 		try {
-			Employee empl1 = dal.saveEmployee(new PermanentEmployee("Jack", "black", dfmt.parse("01.01.1993"),
-					new Address("4300", "sdas", "1231"), 20000));
 
-			dal.saveEmployee(new PermanentEmployee("Jane", "Corsair", dfmt.parse("01.01.1993"),
+			Employee empl1 = dal.saveEmployee(new PermanentEmployee("Jack", "black", dfmt.parse("01.01.1993 0:0"),
+					new Address("4300", "sdas", "1231"), 20000));
+			System.out.println("inserted empl1");
+
+			dal.saveEmployee(new PermanentEmployee("Jane", "Corsair", dfmt.parse("01.01.1993 0:0"),
 					new Address("4300", "sdas", "1231"), 27000));
 
-			dal.saveEmployee(new PermanentEmployee("Lucky", "Bolero", dfmt.parse("01.01.1989"),
+			dal.saveEmployee(new PermanentEmployee("Lucky", "Bolero", dfmt.parse("01.01.1989 0:0"),
 					new Address("4300", "sdas", "1231"), 10000));
 
-			dal.saveEmployee(new PermanentEmployee("Daniel", "Raptor", dfmt.parse("01.01.1983"),
+			dal.saveEmployee(new PermanentEmployee("Daniel", "Raptor", dfmt.parse("01.01.1983 0:0"),
 					new Address("4300", "sdas", "1231"), 30000));
 
 			Project p = dal.saveProject(new Project("Project Orange", empl1));
 			Issue i = dal.saveIssue(new Issue(p));
+			LogbookEntry lb = new LogbookEntry(DateUtil.getTime(2017, 03, 24, 18, 0),
+					DateUtil.getTime(2017, 03, 24, 8, 0));
+			lb.setEmployee(empl1);
+			lb.setPhase(new Phase(PhaseDescriptor.IMPLEMENTATION));
+			dal.saveLogbookEntry(lb);
+
+			dal.assignEmployeToIssue(empl1, i);
+
+			i.setEffort(5);
+			i.setEstimatedTime(20);
+
+			dal.assignIssueToLogbookEntry(i, lb);
 
 		} catch (ParseException e1) {
 		}
 	}
-	//
-	// private static void listIssuesForProject(Long id) {
-	// dal.findAllIssuesForPoject(dal.findProjectById(id)).forEach(System.out::println);
-	// }
-	//
-	// private static void listEmployees(String strId) {
-	// if (strId.equals(""))
-	// dal.findAllEmployees().forEach(System.out::println);
-	// else {
-	// Long id;
-	// try {
-	// id = Long.parseLong(strId);
-	// } catch (NumberFormatException e) {
-	// System.err.println("invalid id" + strId);
-	// return;
-	// }
-	// System.out.println(dal.findEmployeeById(id));
-	// }
-	//
-	// }
-	//
-	// private static void saveEmployee(Employee employee) {
-	// dal.syncEmployee(employee);
-	// }
 
 }
