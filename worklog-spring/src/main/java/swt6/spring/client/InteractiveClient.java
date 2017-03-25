@@ -41,9 +41,9 @@ public class InteractiveClient {
 	public static void main(String[] args) {
 		DateFormat dfmt = new SimpleDateFormat("dd.MM.yyyy hh:mm");
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-		String availCmds = "======= Issue Tracking =======\ncommands: insert p employee, insert t employee, list employee, insert project, list project, \n"
-				+ "add employee project, remove employee project, insert issue, update issue, insert entry, \n"
-				+ "update entry, list issues project, list worktime project, help, quit";
+		String availCmds = "======= Issue Tracking =======\ncommands: insert p employee, insert t employee, list employee, list project, insert project, \n"
+				+ "add employee project, remove employee project, insert issue, update issue, assign issue, insert entry, list entry, \n"
+				+ "update entry, list project employee, list project issue, list issue project by employee, list worktime project, help, quit";
 
 		try (AbstractApplicationContext appCtx = new ClassPathXmlApplicationContext(configFile)) {
 			WorkLogFacade facade = appCtx.getBean("workLog", WorkLogFacade.class);
@@ -323,6 +323,14 @@ public class InteractiveClient {
 			i.setEstimatedTime(20);
 
 			dal.assignIssueToLogbookEntry(i, lb);
+
+			dal.addEmployeeToProject(empl1.getId(), p.getId());
+
+			dal.addEmployeeToProject(2L, p.getId());
+			i = dal.saveIssue(new Issue(p));
+
+			i.setEstimatedTime(5);
+			dal.assignEmployeToIssue(dal.findEmployeeForId(2L), i);
 
 		} catch (ParseException e1) {
 		}
