@@ -27,7 +27,7 @@ import swt6.util.DateUtil;
 
 public class InteractiveClient {
 
-	private static final String configFile = "swt6/spring/applicationContext.xml";
+	private static final String configFile = "swt6/spring/applicationContext_mySql.xml";
 
 	static String promptFor(BufferedReader in, String p) {
 		System.out.print(p + "> ");

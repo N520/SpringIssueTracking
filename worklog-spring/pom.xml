@@ -20,6 +20,7 @@
 		<aspectj.version>1.8.10</aspectj.version>
 		<slf4j.version>1.7.22</slf4j.version>
 		<spring-data.version>1.11.0.RELEASE</spring-data.version>
+		<mysql.version>5.1.38</mysql.version>
 	</properties>
 
 	<build>
@@ -220,5 +221,12 @@
 			<artifactId>javax.inject</artifactId>
 			<version>1</version>
 		</dependency>
+
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>${mysql.version}</version>
+		</dependency>
+
 	</dependencies>
 </project>
